@@ -16,5 +16,16 @@ namespace WindowsFormsApp1
         {
             InitializeComponent();
         }
+
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void importerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormImport formImport = new FormImport();
+            formImport.ShowDialog(this);
+        }
     }
 }
