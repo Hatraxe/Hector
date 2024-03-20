@@ -1,5 +1,5 @@
 ﻿
-namespace WindowsFormsApp1
+namespace Hector
 {
     partial class FormMain
     {
@@ -63,7 +63,7 @@ namespace WindowsFormsApp1
             this.importerToolStripMenuItem,
             this.exporterToolStripMenuItem});
             this.fichierToolStripMenuItem.Name = "fichierToolStripMenuItem";
-            this.fichierToolStripMenuItem.Size = new System.Drawing.Size(66, 26);
+            this.fichierToolStripMenuItem.Size = new System.Drawing.Size(66, 24);
             this.fichierToolStripMenuItem.Text = "Fichier";
             // 
             // actualiserToolStripMenuItem
@@ -84,6 +84,7 @@ namespace WindowsFormsApp1
             this.exporterToolStripMenuItem.Name = "exporterToolStripMenuItem";
             this.exporterToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.exporterToolStripMenuItem.Text = "Exporter";
+            this.exporterToolStripMenuItem.Click += new System.EventHandler(this.exporterToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
