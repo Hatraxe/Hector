@@ -34,7 +34,7 @@ namespace Hector
         {
             if (!backgroundWorker.IsBusy)
             {
-                var args = new ImportArguments { Mode = "Add", FilePath = txtCheminFichier.Text };
+                var args = new ImportArguments { Mode = "Ajouter", FilePath = txtCheminFichier.Text };
                 backgroundWorker.RunWorkerAsync(args);
             }
         }
@@ -43,7 +43,7 @@ namespace Hector
         {
             if (!backgroundWorker.IsBusy)
             {
-                var args = new ImportArguments { Mode = "Overwrite", FilePath = txtCheminFichier.Text };
+                var args = new ImportArguments { Mode = "Ecraser", FilePath = txtCheminFichier.Text };
                 backgroundWorker.RunWorkerAsync(args);
             }
         }
@@ -77,65 +77,7 @@ namespace Hector
             }
         }
 
-        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            var args = e.Argument as ImportArguments;
-            if (args == null)
-            {
-                throw new InvalidOperationException("Argument nul");
-            }
-            string filePath = args.FilePath;
-            string mode = args.Mode;
-
-            string appPath = AppDomain.CurrentDomain.BaseDirectory;
-
-
-            string dbPath = Path.Combine(appPath, "Data", "Hector.SQLite");
-
-            string connectionString = $"Data Source={dbPath};Version=3;";
-
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-                if (mode == "Overwrite")
-                {
-                    var cmdDelete = new SQLiteCommand("DELETE FROM Articles; DELETE FROM Familles; DELETE FROM SousFamilles; DELETE FROM Marques;", conn);
-                    cmdDelete.ExecuteNonQuery();
-                }
-
-                using (var transaction = conn.BeginTransaction())
-                {
-                    int totalLines = File.ReadLines(filePath).Count() - 1; // Exclure l'en-tête
-                    using (StreamReader sr = new StreamReader(filePath))
-                    {
-                        sr.ReadLine(); // Sauter l'en-tête
-                        string currentLine;
-                        int currentindex = 0;
-                        while ((currentLine = sr.ReadLine()) != null)
-                        {
-                            var fields = currentLine.Split(';');
-                            // Adaptez les indices selon l'organisation de votre fichier CSV
-                            var marque = fields[2];
-                            var famille = fields[3];
-                            var sousFamille = fields[4];
-                            var description = fields[0];
-                            var refArticle = fields[1];
-                            var prixHT = float.Parse(fields[5]);
-
-                            int refMarque = GetOrInsertMarque(conn, marque);
-                            int refFamille = GetOrInsertFamille(conn, famille);
-                            int refSousFamille = GetOrInsertSousFamille(conn, refFamille, sousFamille);
-
-                            InsertOrUpdateArticle(conn, refArticle, description, refSousFamille, refMarque, prixHT);
-                            currentindex++;
-                            Console.Out.Write(currentindex);
-                        }
-                    }
-                    transaction.Commit();
-                }
-                conn.Close();
-            }
-        }
+        
         private int GetOrInsertMarque(SQLiteConnection conn, string nomMarque)
         {
             using (var cmdCheck = new SQLiteCommand("SELECT RefMarque FROM Marques WHERE Nom = @Nom", conn))
@@ -197,7 +139,7 @@ namespace Hector
         }
         private void InsertOrUpdateArticle(SQLiteConnection conn, string refArticle, string description, int refSousFamille, int refMarque, float prixHT)
         {
-            // Vérifiez si l'article existe déjà pour déterminer s'il faut insérer ou mettre à jour
+            // Vérifie si l'article existe déjà pour déterminer s'il faut insérer ou mettre à jour
             using (var cmdCheck = new SQLiteCommand("SELECT RefArticle FROM Articles WHERE RefArticle = @RefArticle", conn))
             {
                 cmdCheck.Parameters.AddWithValue("@RefArticle", refArticle);
@@ -232,60 +174,7 @@ namespace Hector
             }
         }
 
-        private int EnsureFamilleExists(SQLiteConnection conn, string nomFamille)
-        {
-            var cmdCheck = new SQLiteCommand("SELECT RefFamille FROM Familles WHERE Nom = @Nom", conn);
-            cmdCheck.Parameters.AddWithValue("@Nom", nomFamille);
-            var result = cmdCheck.ExecuteScalar();
-            if (result != null)
-            {
-                return Convert.ToInt32(result);
-            }
-            else
-            {
-                var cmdInsert = new SQLiteCommand("INSERT INTO Familles (Nom) VALUES (@Nom); SELECT last_insert_rowid();", conn);
-                cmdInsert.Parameters.AddWithValue("@Nom", nomFamille);
-                return Convert.ToInt32(cmdInsert.ExecuteScalar());
-            }
-        }
-        private int EnsureMarqueExists(SQLiteConnection conn, string nomMarque)
-        {
-            var cmdCheck = new SQLiteCommand("SELECT RefMarque FROM Marques WHERE Nom = @Nom", conn);
-            cmdCheck.Parameters.AddWithValue("@Nom", nomMarque);
-            var result = cmdCheck.ExecuteScalar();
-            if (result != null)
-            {
-                return Convert.ToInt32(result);
-            }
-            else
-            {
-                var cmdInsert = new SQLiteCommand("INSERT INTO Marques (Nom) VALUES (@Nom); SELECT last_insert_rowid();", conn);
-                cmdInsert.Parameters.AddWithValue("@Nom", nomMarque);
-                return Convert.ToInt32(cmdInsert.ExecuteScalar());
-            }
-        }
-        private int EnsureSousFamilleExists(SQLiteConnection conn, int refFamille, string nomSousFamille)
-        {
-            // Vérifier si la sous-famille existe déjà
-            var cmdCheck = new SQLiteCommand("SELECT RefSousFamille FROM SousFamilles WHERE Nom = @Nom AND RefFamille = @RefFamille", conn);
-            cmdCheck.Parameters.AddWithValue("@Nom", nomSousFamille);
-            cmdCheck.Parameters.AddWithValue("@RefFamille", refFamille);
-            var result = cmdCheck.ExecuteScalar();
-
-            if (result != null)
-            {
-                // Si la sous-famille existe, retourner son ID
-                return Convert.ToInt32(result);
-            }
-            else
-            {
-                // Si la sous-famille n'existe pas, l'insérer et retourner le nouvel ID
-                var cmdInsert = new SQLiteCommand("INSERT INTO SousFamilles (RefFamille, Nom) VALUES (@RefFamille, @Nom); SELECT last_insert_rowid();", conn);
-                cmdInsert.Parameters.AddWithValue("@RefFamille", refFamille);
-                cmdInsert.Parameters.AddWithValue("@Nom", nomSousFamille);
-                return Convert.ToInt32(cmdInsert.ExecuteScalar());
-            }
-        }
+        
         private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             progressBar.Value = e.ProgressPercentage;
@@ -293,12 +182,106 @@ namespace Hector
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            if (e.Error != null)
+            {
+                MessageBox.Show($"Une erreur est survenue : {e.Error.Message}");
+            }
+            else if (e.Cancelled)
+            {
+                MessageBox.Show("L'opération a été annulée.");
+            }
+            else
+            {
+                var result = e.Result as ImportResult;
+                MessageBox.Show($"Importation terminée. {result.Count} articles ont été traités.");
+            }
+            progressBar.Value = 0;
+        }
+
+
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var args = e.Argument as ImportArguments;
+            if (args == null)
+            {
+                throw new InvalidOperationException("Argument nul");
+            }
+            string filePath = args.FilePath;
+            string mode = args.Mode;
+
+            string appPath = AppDomain.CurrentDomain.BaseDirectory;
+
+
+            string dbPath = Path.Combine(appPath, "Data", "Hector.SQLite");
+
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+                if (mode == "Ecraser")
+                {
+                    var cmdDelete = new SQLiteCommand("DELETE FROM Articles; DELETE FROM Familles; DELETE FROM SousFamilles; DELETE FROM Marques;", conn);
+                    cmdDelete.ExecuteNonQuery();
+                }
+
+                using (var transaction = conn.BeginTransaction())
+                {
+                    int totalLines = File.ReadLines(filePath).Count() - 1; // Exclue l'en-tête
+                    using (StreamReader sr = new StreamReader(filePath, Encoding.UTF8))
+                    {
+                        sr.ReadLine(); // Saute l'en-tête
+                        string currentLine;
+                        int currentindex = 0;
+
+                        // Boucle while qui va parcourrir chaque ligne du fichier csv
+                        while ((currentLine = sr.ReadLine()) != null)
+                        {
+                            var fields = currentLine.Split(';'); // le séparateur est ";"
+
+                            
+                            
+                            var description = fields[0];
+                            var refArticle = fields[1];
+                            var marque = fields[2];
+                            var famille = fields[3];
+                            var sousFamille = fields[4];
+                            var prixHT = float.Parse(fields[5]);
+
+                            int refMarque = GetOrInsertMarque(conn, marque);
+                            int refFamille = GetOrInsertFamille(conn, famille);
+                            int refSousFamille = GetOrInsertSousFamille(conn, refFamille, sousFamille);
+
+                            InsertOrUpdateArticle(conn, refArticle, description, refSousFamille, refMarque, prixHT);
+                            int percentComplete = (int)((float)currentindex / totalLines * 100);
+                            currentindex++;
+                            backgroundWorker.ReportProgress(percentComplete);
+                        }
+                        e.Result = new ImportResult
+                        {
+                            Count = currentindex,
+
+                        };
+                    }
+                    transaction.Commit();
+                }
+                conn.Close();
+            }
+
 
         }
+
         public class ImportArguments
         {
             public string FilePath { get; set; }
-            public string Mode { get; set; } // "Add" ou "Overwrite"
+            public string Mode { get; set; } // "Ajouter" ou "Ecraser"
         }
+
+        public class ImportResult
+        {
+            public int Count { get; set; }
+            // C'est ici qu'on peut ajouter plus de détails pour le résultat de l'importation
+        }
+
     }
 }
