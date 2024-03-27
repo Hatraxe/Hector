@@ -199,7 +199,7 @@ namespace Hector
         }
 
 
-        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        /*private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             var args = e.Argument as ImportArguments;
             if (args == null)
@@ -221,8 +221,8 @@ namespace Hector
                 conn.Open();
                 if (mode == "Ecraser")
                 {
-                    var cmdDelete = new SQLiteCommand("DELETE FROM Articles; DELETE FROM Familles; DELETE FROM SousFamilles; DELETE FROM Marques;", conn);
-                    cmdDelete.ExecuteNonQuery();
+                    // Suppression des données existantes si mode "Ecraser"
+                    ClearDatabase(conn);
                 }
 
                 using (var transaction = conn.BeginTransaction())
@@ -269,9 +269,88 @@ namespace Hector
             }
 
 
+        }*/
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var args = e.Argument as ImportArguments;
+            if (args == null)
+            {
+                throw new InvalidOperationException("Argument nul");
+            }
+            string filePath = args.FilePath;
+            string mode = args.Mode;
+
+            string appPath = AppDomain.CurrentDomain.BaseDirectory;
+            string dbPath = Path.Combine(appPath, "Data", "Hector.SQLite");
+            string connectionString = $"Data Source={dbPath};Version=3;";
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+                if (mode == "Ecraser")
+                {
+                    // Suppression des données existantes si mode "Ecraser"
+                    ClearDatabase(conn);
+                }
+
+                using (var transaction = conn.BeginTransaction())
+                {
+                    int totalLines = File.ReadLines(filePath).Count() - 1; // Exclue l'en-tête
+                    using (StreamReader sr = new StreamReader(filePath, Encoding.UTF8))
+                    {
+                        sr.ReadLine(); // Saute l'en-tête
+                        string currentLine;
+                        int currentindex = 0;
+
+                        // Boucle while qui va parcourir chaque ligne du fichier csv
+                        while ((currentLine = sr.ReadLine()) != null)
+                        {
+                            var fields = currentLine.Split(';'); // le séparateur est ";"
+
+                            var description = fields[0];
+                            var refArticle = fields[1];
+                            var marque = fields[2];
+                            var famille = fields[3];
+                            var sousFamille = fields[4];
+                            var prixHT = float.Parse(fields[5]);
+
+                            // Récupération ou insertion de la marque
+                            int refMarque = GetOrInsertMarque(conn, marque);
+
+                            // Récupération ou insertion de la famille
+                            int refFamille = GetOrInsertFamille(conn, famille);
+
+                            // Récupération ou insertion de la sous-famille
+                            int refSousFamille = GetOrInsertSousFamille(conn, refFamille, sousFamille);
+
+                            // Insertion ou mise à jour de l'article
+                            InsertOrUpdateArticle(conn, refArticle, description, refSousFamille, refMarque, prixHT);
+
+                            int percentComplete = (int)((float)currentindex / totalLines * 100);
+                            currentindex++;
+                            backgroundWorker.ReportProgress(percentComplete);
+                        }
+                        e.Result = new ImportResult
+                        {
+                            Count = currentindex,
+                        };
+                    }
+                    transaction.Commit();
+                }
+                conn.Close();
+            }
         }
 
-        public class ImportArguments
+
+        // Méthode pour supprimer toutes les données de la base de données
+        private void ClearDatabase(SQLiteConnection conn)
+        {
+            var cmdDelete = new SQLiteCommand("DELETE FROM Articles; DELETE FROM Familles; DELETE FROM SousFamilles; DELETE FROM Marques;", conn);
+            cmdDelete.ExecuteNonQuery();
+        }
+    }
+
+    public class ImportArguments
         {
             public string FilePath { get; set; }
             public string Mode { get; set; } // "Ajouter" ou "Ecraser"
@@ -284,4 +363,3 @@ namespace Hector
         }
 
     }
-}
