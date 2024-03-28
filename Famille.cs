@@ -5,19 +5,10 @@ namespace WindowsFormsApp1
 {
     class Famille
     {
-        public int Id { get; set; }
+        public int ReferenceFamille { get; set; }
         public string Nom { get; set; }
 
-      /*  private void CreateFamillesTable(SQLiteConnection conn)
-        {
-            using (var cmd = new SQLiteCommand("CREATE TABLE IF NOT EXISTS Familles (" +
-                                               "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                                               "Nom TEXT UNIQUE" +
-                                               ")", conn))
-            {
-                cmd.ExecuteNonQuery();
-            }
-        }*/
+      
 
         public void InsertOrUpdate(SQLiteConnection conn)
         {
@@ -28,52 +19,27 @@ namespace WindowsFormsApp1
 
             using (var transaction = conn.BeginTransaction())
             {
-                if (Id == 0)
+                if (ReferenceFamille == 0)
                 {
                     // Nouvelle famille : effectue une insertion
-                    using (var cmdInsert = new SQLiteCommand("INSERT INTO Familles (Nom) VALUES (@Nom)", conn))
+                    using (var cmdInsert = new SQLiteCommand("INSERT INTO Familles (Nom) VALUES (@Nom); SELECT last_insert_rowid();", conn))
                     {
                         cmdInsert.Parameters.AddWithValue("@Nom", Nom);
-                        cmdInsert.ExecuteNonQuery();
-                    }
-                    // Récupère l'ID de la famille nouvellement insérée
-                    using (var cmdGetLastId = new SQLiteCommand("SELECT last_insert_rowid()", conn))
-                    {
-                        Id = Convert.ToInt32(cmdGetLastId.ExecuteScalar());
+                        ReferenceFamille = Convert.ToInt32(cmdInsert.ExecuteScalar());
                     }
                 }
                 else
                 {
                     // Famille existante : effectue une mise à jour
-                    using (var cmdUpdate = new SQLiteCommand("UPDATE Familles SET Nom = @Nom WHERE Id = @Id", conn))
+                    using (var cmdUpdate = new SQLiteCommand("UPDATE Familles SET Nom = @Nom WHERE ReferenceFamille = @ReferenceFamille", conn))
                     {
                         cmdUpdate.Parameters.AddWithValue("@Nom", Nom);
-                        cmdUpdate.Parameters.AddWithValue("@Id", Id);
+                        cmdUpdate.Parameters.AddWithValue("@ReferenceFamille", ReferenceFamille);
                         cmdUpdate.ExecuteNonQuery();
                     }
                 }
 
                 transaction.Commit();
-            }
-        }
-
-        private Famille GetFamilleByNom(SQLiteConnection conn, string nomFamille)
-        {
-            using (var cmdCheck = new SQLiteCommand("SELECT * FROM Familles WHERE Nom = @Nom", conn))
-            {
-                cmdCheck.Parameters.AddWithValue("@Nom", nomFamille);
-                using (var reader = cmdCheck.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return new Famille
-                        {
-                            Id = Convert.ToInt32(reader["Id"]),
-                            Nom = reader["Nom"].ToString()
-                        };
-                    }
-                    return null;
-                }
             }
         }
     }

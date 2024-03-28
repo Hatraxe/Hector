@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Hector
 {
     partial class FormImport
@@ -49,7 +51,7 @@ namespace Hector
             this.txtCheminFichier.Name = "txtCheminFichier";
             this.txtCheminFichier.Size = new System.Drawing.Size(476, 22);
             this.txtCheminFichier.TabIndex = 0;
-            this.txtCheminFichier.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+           // this.txtCheminFichier.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // btnAjouter
             // 
@@ -127,6 +129,9 @@ namespace Hector
 
         }
 
+       
+
+
         #endregion
 
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
@@ -137,5 +142,6 @@ namespace Hector
         private System.ComponentModel.BackgroundWorker backgroundWorker;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnSelectioner;
+        private EventHandler textBox1_TextChanged;
     }
 }

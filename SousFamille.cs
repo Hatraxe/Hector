@@ -1,30 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
     class SousFamille
     {
-        public int Id { get; set; }
+        public int ReferenceSousFamille { get; set; }
         public string Nom { get; set; }
         public int RefFamille { get; set; }
-
-        private void CreateSousFamillesTable(SQLiteConnection conn)
-        {
-            using (var cmd = new SQLiteCommand("CREATE TABLE IF NOT EXISTS SousFamilles (" +
-                                               "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                                               "Nom TEXT," +
-                                               "RefFamille INTEGER," +
-                                               "FOREIGN KEY(RefFamille) REFERENCES Familles(RefFamille)" +
-                                               ")", conn))
-            {
-                cmd.ExecuteNonQuery();
-            }
-        }
 
         public void InsertOrUpdate(SQLiteConnection conn)
         {
@@ -35,7 +18,7 @@ namespace WindowsFormsApp1
 
             using (var transaction = conn.BeginTransaction())
             {
-                if (Id == 0)
+                if (ReferenceSousFamille == 0)
                 {
                     // Nouvelle sous-famille : effectue une insertion
                     using (var cmdInsert = new SQLiteCommand("INSERT INTO SousFamilles (Nom, RefFamille) VALUES (@Nom, @RefFamille)", conn))
@@ -44,20 +27,20 @@ namespace WindowsFormsApp1
                         cmdInsert.Parameters.AddWithValue("@RefFamille", RefFamille);
                         cmdInsert.ExecuteNonQuery();
                     }
-                    // Récupère l'ID de la sous-famille nouvellement insérée
+                    // Récupère la référence de la sous-famille nouvellement insérée
                     using (var cmdGetLastId = new SQLiteCommand("SELECT last_insert_rowid()", conn))
                     {
-                        Id = Convert.ToInt32(cmdGetLastId.ExecuteScalar());
+                        ReferenceSousFamille = Convert.ToInt32(cmdGetLastId.ExecuteScalar());
                     }
                 }
                 else
                 {
                     // Sous-famille existante : effectue une mise à jour
-                    using (var cmdUpdate = new SQLiteCommand("UPDATE SousFamilles SET Nom = @Nom, RefFamille = @RefFamille WHERE Id = @Id", conn))
+                    using (var cmdUpdate = new SQLiteCommand("UPDATE SousFamilles SET Nom = @Nom, RefFamille = @RefFamille WHERE ReferenceSousFamille = @ReferenceSousFamille", conn))
                     {
                         cmdUpdate.Parameters.AddWithValue("@Nom", Nom);
                         cmdUpdate.Parameters.AddWithValue("@RefFamille", RefFamille);
-                        cmdUpdate.Parameters.AddWithValue("@Id", Id);
+                        cmdUpdate.Parameters.AddWithValue("@ReferenceSousFamille", ReferenceSousFamille);
                         cmdUpdate.ExecuteNonQuery();
                     }
                 }
@@ -66,18 +49,18 @@ namespace WindowsFormsApp1
             }
         }
 
-        private SousFamille GetSousFamilleById(SQLiteConnection conn, int id)
+        private SousFamille GetSousFamilleByReference(SQLiteConnection conn, int reference)
         {
-            using (var cmdCheck = new SQLiteCommand("SELECT * FROM SousFamilles WHERE Id = @Id", conn))
+            using (var cmdCheck = new SQLiteCommand("SELECT * FROM SousFamilles WHERE ReferenceSousFamille = @ReferenceSousFamille", conn))
             {
-                cmdCheck.Parameters.AddWithValue("@Id", id);
+                cmdCheck.Parameters.AddWithValue("@ReferenceSousFamille", reference);
                 using (var reader = cmdCheck.ExecuteReader())
                 {
                     if (reader.Read())
                     {
                         return new SousFamille
                         {
-                            Id = Convert.ToInt32(reader["Id"]),
+                            ReferenceSousFamille = Convert.ToInt32(reader["ReferenceSousFamille"]),
                             Nom = reader["Nom"].ToString(),
                             RefFamille = Convert.ToInt32(reader["RefFamille"])
                         };
