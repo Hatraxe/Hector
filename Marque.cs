@@ -8,7 +8,7 @@ namespace WindowsFormsApp1
         public int ReferenceMarque { get; set; }
         public string Nom { get; set; }
 
-     
+
 
         public void InsertOrUpdate(SQLiteConnection conn)
         {
@@ -17,29 +17,26 @@ namespace WindowsFormsApp1
                 throw new ArgumentNullException(nameof(conn));
             }
 
-            using (var transaction = conn.BeginTransaction())
+            // Vérifier si la marque existe déjà dans la base de données
+            var cmdCheckExistence = new SQLiteCommand("SELECT RefMarque FROM Marques WHERE Nom = @nom", conn);
+            cmdCheckExistence.Parameters.AddWithValue("@nom", Nom);
+            var existingRef = cmdCheckExistence.ExecuteScalar();
+
+            if (existingRef != null) // La marque existe déjà
             {
-                if (ReferenceMarque == 0)
+                ReferenceMarque = Convert.ToInt32(existingRef); // Utiliser la référence existante
+            }
+            else // La marque n'existe pas encore, il faut l'insérer
+            {
+                using (var transaction = conn.BeginTransaction())
                 {
-                    // Nouvelle marque : effectue une insertion
                     using (var cmdInsert = new SQLiteCommand("INSERT INTO Marques (Nom) VALUES (@Nom); SELECT last_insert_rowid();", conn))
                     {
                         cmdInsert.Parameters.AddWithValue("@Nom", Nom);
                         ReferenceMarque = Convert.ToInt32(cmdInsert.ExecuteScalar());
                     }
+                    transaction.Commit();
                 }
-                else
-                {
-                    // Marque existante : effectue une mise à jour
-                    using (var cmdUpdate = new SQLiteCommand("UPDATE Marques SET Nom = @Nom WHERE Id = @Id", conn))
-                    {
-                        cmdUpdate.Parameters.AddWithValue("@Nom", Nom);
-                        cmdUpdate.Parameters.AddWithValue("@Id", ReferenceMarque);
-                        cmdUpdate.ExecuteNonQuery();
-                    }
-                }
-
-                transaction.Commit();
             }
         }
     }

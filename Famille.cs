@@ -8,7 +8,7 @@ namespace WindowsFormsApp1
         public int ReferenceFamille { get; set; }
         public string Nom { get; set; }
 
-      
+
 
         public void InsertOrUpdate(SQLiteConnection conn)
         {
@@ -19,25 +19,24 @@ namespace WindowsFormsApp1
 
             using (var transaction = conn.BeginTransaction())
             {
-                if (ReferenceFamille == 0)
+
+
+                // Vérifier si la famille existe déjà dans la base de données
+                var cmdCheckExistence = new SQLiteCommand("SELECT RefFamille FROM Familles WHERE Nom = @nom", conn);
+                cmdCheckExistence.Parameters.AddWithValue("@nom", Nom);
+                var existingRef = cmdCheckExistence.ExecuteScalar();
+
+                if (existingRef != null) // La famille existe déjà
                 {
-                    // Nouvelle famille : effectue une insertion
-                    using (var cmdInsert = new SQLiteCommand("INSERT INTO Familles (Nom) VALUES (@Nom); SELECT last_insert_rowid();", conn))
-                    {
-                        cmdInsert.Parameters.AddWithValue("@Nom", Nom);
-                        ReferenceFamille = Convert.ToInt32(cmdInsert.ExecuteScalar());
-                    }
+                    ReferenceFamille = Convert.ToInt32(existingRef); // Utiliser la référence existante
                 }
-                else
+                else // La famille n'existe pas encore, il faut l'insérer
                 {
-                    // Famille existante : effectue une mise à jour
-                    using (var cmdUpdate = new SQLiteCommand("UPDATE Familles SET Nom = @Nom WHERE ReferenceFamille = @ReferenceFamille", conn))
-                    {
-                        cmdUpdate.Parameters.AddWithValue("@Nom", Nom);
-                        cmdUpdate.Parameters.AddWithValue("@ReferenceFamille", ReferenceFamille);
-                        cmdUpdate.ExecuteNonQuery();
-                    }
+                    var cmdInsert = new SQLiteCommand("INSERT INTO Familles (Nom) VALUES (@nom); SELECT last_insert_rowid();", conn);
+                    cmdInsert.Parameters.AddWithValue("@nom", Nom);
+                    ReferenceFamille = Convert.ToInt32(cmdInsert.ExecuteScalar()); // Récupérer la référence de la nouvelle famille
                 }
+
 
                 transaction.Commit();
             }
