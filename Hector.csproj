@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Article.cs" />
+    <Compile Include="GestionGroupes.cs" />
     <Compile Include="Famille.cs" />
     <Compile Include="FormImport.cs">
       <SubType>Form</SubType>

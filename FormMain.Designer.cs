@@ -147,7 +147,7 @@ namespace Hector
             this.listView.ForeColor = Color.Black;
 
             // Utilisation d'une police différente pour les éléments de la ListView
-            this.listView.Font = new Font("Roboto", 11, FontStyle.Regular);
+            this.listView.Font = new Font("Arial", 11, FontStyle.Regular);
 
             // Styliser les en-têtes de colonnes
           

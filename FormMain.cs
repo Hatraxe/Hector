@@ -22,7 +22,7 @@ namespace Hector
         {
             InitializeComponent();
             InitializeDatabase();
-           
+
         }
 
         private void InitializeDatabase()
@@ -136,6 +136,7 @@ namespace Hector
             }
         }
 
+
         private void LoadSousFamilles(TreeNode parentNode, int refFamille)
         {
             using (var conn = new SQLiteConnection(connectionString))
@@ -184,24 +185,156 @@ namespace Hector
         {
             if (e.Node.Text == "Tous les articles")
             {
-               
                 LoadAllArticles();
             }
-            if (e.Node.Parent != null && e.Node.Parent.Text == "Marques")
+            else if (e.Node.Parent != null && e.Node.Parent.Text == "Familles" )
             {
+                // Si un nœud "Familles" est sélectionné
+
+                LoadSousFamilleListView();
+            }
+            else if (e.Node.Parent != null && e.Node.Parent.Text == "Marques")
+            {
+                // Si un nœud "Marques" est sélectionné
                 string marque = e.Node.Text;
                 LoadArticlesByMarque(marque);
             }
+            else if (e.Node.Parent != null && e.Node.Parent.Parent != null && e.Node.Parent.Parent.Text == "Familles")
+            {
+                // Si un nœud "Sous-Familles" est sélectionné
+                string sousFamille = e.Node.Text;
+                LoadArticlesBySousFamille(sousFamille);
+            }
+            else if (e.Node.Text == "Familles")
+            {
+                LoadFamilleListView();
+            }
+            else if (e.Node.Text == "Marques" && e.Node.Parent == null)
+            {
+                LoadMarqueListView();
+            }
         }
-        private void LoadArticlesByMarque(string marque)
+        private void LoadMarqueListView()
         {
             listView.Items.Clear();
+            listView.Columns.Clear(); // Effacer les colonnes existantes
+
+            // Ajouter les entêtes de colonnes appropriées
+            listView.Columns.Add("Description", 200);
+
 
             using (var conn = new SQLiteConnection(connectionString))
             {
                 conn.Open();
 
-                string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT 
+                string query = "SELECT Nom FROM Marques";
+
+                using (var cmd = new SQLiteCommand(query, conn))
+                {
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string marqueName = reader["Nom"].ToString();
+
+                            ListViewItem item = new ListViewItem(new string[] { marqueName });
+                            listView.Items.Add(item);
+                        }
+                    }
+                }
+
+                conn.Close();
+            }
+        }
+
+        private void LoadSousFamilleListView()
+        {
+            listView.Items.Clear();
+            listView.Columns.Clear(); // Effacer les colonnes existantes
+
+            // Ajouter les entêtes de colonnes appropriées
+            listView.Columns.Add("Description", 200);
+
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = "SELECT Nom FROM SousFamilles";
+
+                using (var cmd = new SQLiteCommand(query, conn))
+                {
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string sousFamilleName = reader["Nom"].ToString();
+
+                            ListViewItem item = new ListViewItem(new string[] { sousFamilleName });
+                            listView.Items.Add(item);
+                        }
+                    }
+                }
+
+                conn.Close();
+            }
+        } 
+        private void LoadFamilleListView()
+        {
+            listView.Items.Clear();
+            listView.Columns.Clear(); // Effacer les colonnes existantes
+
+            // Ajouter les entêtes de colonnes appropriées
+            listView.Columns.Add("Description", 200);
+
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = "SELECT Nom FROM Familles";
+
+                using (var cmd = new SQLiteCommand(query, conn))
+                {
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string familleName = reader["Nom"].ToString();
+
+                            ListViewItem item = new ListViewItem(new string[] { familleName });
+                            listView.Items.Add(item);
+                        }
+                    }
+                }
+
+                conn.Close();
+            }
+        }
+
+      
+        private void LoadArticlesByMarque(string marque)
+        {
+            listView.Items.Clear();
+            listView.Columns.Clear(); // Effacer les colonnes existantes
+
+            // Ajouter les entêtes de colonnes appropriées
+            listView.Columns.Add("Description", 200);
+            listView.Columns.Add("Ref", 100);
+            listView.Columns.Add("Marque", 150);
+            listView.Columns.Add("Famille", 150);
+            listView.Columns.Add("Sous-Famille", 150);
+            listView.Columns.Add("Prix H.T.", 100);
+            listView.Columns.Add("Quantité", 100);
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite
                          FROM Articles A 
                          INNER JOIN Marques M ON A.RefMarque = M.RefMarque
                          INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
@@ -219,11 +352,12 @@ namespace Hector
                             string description = reader["Description"].ToString();
                             string refArticle = reader["RefArticle"].ToString();
                             string marqueName = reader["Marque"].ToString();
-                            string famille = reader["Famille"].ToString();
+                            string familleName = reader["Famille"].ToString();
                             string sousFamille = reader["Sous-Famille"].ToString();
                             string prixHT = reader["PrixHT"].ToString();
+                            string quantite = reader["Quantite"].ToString(); 
 
-                            ListViewItem item = new ListViewItem(new string[] { refArticle, description, famille, sousFamille, marqueName, prixHT });
+                            ListViewItem item = new ListViewItem(new string[] { description, refArticle, marqueName, familleName, sousFamille, prixHT, quantite });
                             listView.Items.Add(item);
                         }
                     }
@@ -233,9 +367,56 @@ namespace Hector
             }
         }
 
-        private void LoadAllFamily()
+        private void LoadArticlesBySousFamille(string sousFamille)
         {
 
+            listView.Items.Clear();
+            listView.Columns.Clear(); // Effacer les colonnes existantes
+
+            // Ajouter les entêtes de colonnes appropriées
+            listView.Columns.Add("Description", 200);
+            listView.Columns.Add("Ref", 100);
+            listView.Columns.Add("Marque", 150);
+            listView.Columns.Add("Famille", 150);
+            listView.Columns.Add("Sous-Famille", 150);
+            listView.Columns.Add("Prix H.T.", 100);
+            listView.Columns.Add("Quantité", 100);
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite
+                             FROM Articles A 
+                             INNER JOIN Marques M ON A.RefMarque = M.RefMarque
+                             INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
+                             INNER JOIN Familles F ON SF.RefFamille = F.RefFamille
+                             WHERE SF.Nom = @SousFamille";
+
+                using (var cmd = new SQLiteCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@SousFamille", sousFamille);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string description = reader["Description"].ToString();
+                            string refArticle = reader["RefArticle"].ToString();
+                            string marque = reader["Marque"].ToString();
+                            string famille = reader["Famille"].ToString();
+                            string sousFamilleName = reader["Sous-Famille"].ToString();
+                            string prixHT = reader["PrixHT"].ToString();
+                            string quantite = reader["Quantite"].ToString();
+
+                            ListViewItem item = new ListViewItem(new string[] { description, refArticle, marque, famille, sousFamilleName, prixHT,quantite });
+                            listView.Items.Add(item);
+                        }
+                    }
+                }
+
+                conn.Close();
+            }
         }
 
         private void LoadAllArticles()
@@ -251,15 +432,16 @@ namespace Hector
             listView.Columns.Add("Sous-famille", 150);
             listView.Columns.Add("Prix H.T.", 100);
             listView.Columns.Add("Quantité", 100);
+            
             using (var conn = new SQLiteConnection(connectionString))
             {
                 conn.Open();
 
                 string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite 
-                         FROM Articles A 
-                         INNER JOIN Marques M ON A.RefMarque = M.RefMarque
-                         INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
-                         INNER JOIN Familles F ON SF.RefFamille = F.RefFamille";
+                             FROM Articles A 
+                             INNER JOIN Marques M ON A.RefMarque = M.RefMarque
+                             INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
+                             INNER JOIN Familles F ON SF.RefFamille = F.RefFamille";
 
                 using (var cmd = new SQLiteCommand(query, conn))
                 {
@@ -277,14 +459,15 @@ namespace Hector
 
                             ListViewItem item = new ListViewItem(new string[] { description, refArticle, marque, famille, sousFamille, prixHT, quantite });
                             listView.Items.Add(item);
+
                         }
                     }
                 }
                 conn.Close();
+                GestionGroupes.GroupItemsByFirstLetter(listView);
             }
         }
-
-
-
     }
+
+
 }
