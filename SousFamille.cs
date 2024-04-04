@@ -57,5 +57,27 @@ namespace WindowsFormsApp1
                 }
             }
         }
+        public static int GetReferenceFromNom(string nom, string connectionString)
+        {
+            int reference = 0;
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                // Exécuter la requête SQL pour récupérer la référence de la sous-famille
+                var cmdGetReference = new SQLiteCommand("SELECT RefSousFamille FROM SousFamilles WHERE Nom = @nom", conn);
+                cmdGetReference.Parameters.AddWithValue("@nom", nom);
+                var result = cmdGetReference.ExecuteScalar();
+
+                // Vérifier si une référence a été trouvée
+                if (result != null && result != DBNull.Value)
+                {
+                    reference = Convert.ToInt32(result);
+                }
+            }
+
+            return reference;
+        }
     }
 }

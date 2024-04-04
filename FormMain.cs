@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿
+using System;
 using System.Data.SQLite;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1;
 
 namespace Hector
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class FormMain : Form
     {
         private string dbPath;
@@ -22,7 +19,6 @@ namespace Hector
         {
             InitializeComponent();
             InitializeDatabase();
-
         }
 
         private void InitializeDatabase()
@@ -54,48 +50,9 @@ namespace Hector
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string filePath = saveFileDialog.FileName;
-                ExportDataToCSV(filePath);
+                GestionExport.ExportDataToCSV(filePath, connectionString);
+                MessageBox.Show("Export réussi avec succès");
             }
-        }
-
-        private void ExportDataToCSV(string filePath)
-        {
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-
-                using (var cmd = new SQLiteCommand(@"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT 
-                                             FROM Articles A 
-                                             INNER JOIN Marques M ON A.RefMarque = M.RefMarque
-                                             INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
-                                             INNER JOIN Familles F ON SF.RefFamille = F.RefFamille", conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filePath))
-                        {
-                            file.WriteLine("Description;Ref;Marque;Famille;Sous-Famille;Prix H.T.");
-
-                            while (reader.Read())
-                            {
-                                string description = reader["Description"].ToString();
-                                string refArticle = reader["RefArticle"].ToString();
-                                string marque = reader["Marque"].ToString();
-                                string famille = reader["Famille"].ToString();
-                                string sousFamille = reader["Sous-Famille"].ToString();
-                                string prixHT = reader["PrixHT"].ToString();
-
-                                string line = $"{description};{refArticle};{marque};{famille};{sousFamille};{prixHT}";
-                                file.WriteLine(line);
-                            }
-                        }
-                    }
-                }
-
-                conn.Close();
-            }
-
-            MessageBox.Show("Export réussi avec succès");
         }
 
         private void LoadTreeViewData()
@@ -108,366 +65,272 @@ namespace Hector
             treeView.Nodes.Add(familiesNode);
             treeView.Nodes.Add(brandsNode);
 
-            LoadFamilies(familiesNode);
-            LoadBrands(brandsNode);
+            GestionLoad.LoadFamilies(familiesNode, connectionString);
+            GestionLoad.LoadBrands(brandsNode, connectionString);
         }
 
-        private void LoadFamilies(TreeNode parentNode)
-        {
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-                string query = "SELECT RefFamille, Nom FROM Familles";
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int refFamille = Convert.ToInt32(reader["RefFamille"]);
-                            string familleName = reader["Nom"].ToString();
-                            TreeNode familyNode = new TreeNode(familleName);
-                            LoadSousFamilles(familyNode, refFamille); // Charger les sous-familles pour cette famille
-                            parentNode.Nodes.Add(familyNode);
-                        }
-                    }
-                }
-                conn.Close();
-            }
-        }
-
-
-        private void LoadSousFamilles(TreeNode parentNode, int refFamille)
-        {
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-                string query = "SELECT Nom FROM SousFamilles WHERE RefFamille = @RefFamille";
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@RefFamille", refFamille);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string sousFamilleName = reader["Nom"].ToString();
-                            TreeNode sousFamilyNode = new TreeNode(sousFamilleName);
-                            parentNode.Nodes.Add(sousFamilyNode);
-                        }
-                    }
-                }
-                conn.Close();
-            }
-        }
-
-        private void LoadBrands(TreeNode parentNode)
-        {
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-                string query = "SELECT Nom FROM Marques";
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string MarqueName = reader["Nom"].ToString();
-                            parentNode.Nodes.Add(MarqueName);
-                        }
-                    }
-                }
-                conn.Close();
-            }
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void treeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (e.Node.Text == "Tous les articles")
             {
-                LoadAllArticles();
+                GestionLoad.LoadAllArticles(listView, connectionString);
             }
-            else if (e.Node.Parent != null && e.Node.Parent.Text == "Familles" )
+            else if (e.Node.Parent != null && e.Node.Parent.Text == "Familles")
             {
                 // Si un nœud "Familles" est sélectionné
-
-                LoadSousFamilleListView();
+                string famille = e.Node.Text;
+                GestionLoad.LoadSousFamillesByFamille(listView, connectionString, famille);
             }
             else if (e.Node.Parent != null && e.Node.Parent.Text == "Marques")
             {
                 // Si un nœud "Marques" est sélectionné
                 string marque = e.Node.Text;
-                LoadArticlesByMarque(marque);
+                GestionLoad.LoadArticlesByMarque(listView, connectionString, marque);
             }
             else if (e.Node.Parent != null && e.Node.Parent.Parent != null && e.Node.Parent.Parent.Text == "Familles")
             {
                 // Si un nœud "Sous-Familles" est sélectionné
                 string sousFamille = e.Node.Text;
-                LoadArticlesBySousFamille(sousFamille);
+                GestionLoad.LoadArticlesBySousFamille(listView, connectionString, sousFamille);
             }
             else if (e.Node.Text == "Familles")
             {
-                LoadFamilleListView();
+                GestionLoad.LoadFamilleListView(listView, connectionString);
             }
             else if (e.Node.Text == "Marques" && e.Node.Parent == null)
             {
-                LoadMarqueListView();
+                GestionLoad.LoadMarqueListView(listView, connectionString);
             }
         }
-        private void LoadMarqueListView()
+        private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
+            switch (e.Column)
+            {
+                case 0: // Colonne "Description"
+                    GestionGroupes.GroupItemsByFirstLetter(listView);
+                    break;
+                case 3: // Colonne "Familles"
+                    GestionGroupes.GroupItemsByFamille(listView);
+                    break;
+                case 4: // Colonne "Sous-Familles"
+                    GestionGroupes.GroupItemsBySousFamille(listView);
+                    break;
+                case 2: // Colonne "Marque"
+                    GestionGroupes.GroupItemsByMarque(listView);
+                    break;
+                default:
+                    // Ne rien faire pour les autres colonnes ou en cas de colonne non gérée
+                    break;
+            }
+        }
+        private void listView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter || e.KeyCode == Keys.Space)
+            {
+                if (listView.SelectedItems.Count > 0)
+                {
+                    FormModifier formModif = new FormModifier(listView);
+                    formModif.ShowDialog(this);
+                }
+            }
+        }
 
-            // Ajouter les entêtes de colonnes appropriées
-            listView.Columns.Add("Description", 200);
+        // Méthode pour gérer l'événement DoubleClick
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListView_DoubleClick(object sender, EventArgs e)
+        {
+            OuvrirFenetreModification();
+
+        }
+
+        // Méthode pour ouvrir la fenêtre de modification de l'élément
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="description"></param>
+        /// <param name="refArticle"></param>
+        /// <param name="marque"></param>
+        /// <param name="famille"></param>
+        /// <param name="sousFamille"></param>
+        /// <param name="prixHT"></param>
+        /// <param name="quantite"></param>
+        private void OuvrirFenetreModification()
+        {
+            ListViewItem selectedItem = listView.SelectedItems[0];
+            int nbrColonnes = selectedItem.SubItems.Count;
+            if (listView.SelectedItems.Count > 0 && nbrColonnes == 7)
+            {
 
 
+                // Récupérer les valeurs de chaque colonne de l'élément sélectionné
+                string description = selectedItem.SubItems[0].Text;
+                string refArticle = selectedItem.SubItems[1].Text;
+                string marque = selectedItem.SubItems[2].Text;
+                string famille = selectedItem.SubItems[3].Text;
+                string sousFamille = selectedItem.SubItems[4].Text;
+                string prixHT = selectedItem.SubItems[5].Text;
+                string quantite = selectedItem.SubItems[6].Text; // Si vous avez une colonne pour la quantité
+
+                // Ouvrir la fenêtre de modification avec les valeurs récupérées
+                FormModifier formModif = new FormModifier(listView);
+                // Passer les valeurs à la fenêtre de modification
+                formModif.RemplirChamps(description, refArticle, marque, famille, sousFamille, prixHT, quantite);
+                formModif.ShowDialog(this);
+            }
+            GestionLoad.LoadAllArticles(listView, connectionString);
+
+
+            if (nbrColonnes == 1)
+            {
+                string description = selectedItem.Text;
+            }
+
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListView_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F5)
+            {
+                treeView.Nodes.Clear();
+                LoadTreeViewData();
+
+            }
+
+
+            if (e.KeyCode == Keys.Delete)
+            {
+                if (listView.SelectedItems.Count > 0)
+                {
+                    SupprimerElement();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void actualiserToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            treeView.Nodes.Clear();
+            LoadTreeViewData();
+        }
+        private void FormMain_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+        private void SupprimerElement()
+        {
+            if (listView.SelectedItems.Count > 0)
+            {
+                // Récupérer l'élément sélectionné dans le ListView
+                ListViewItem selectedItem = listView.SelectedItems[0];
+
+                // Récupérer l'identifiant de l'élément sélectionné (par exemple, la référence de l'article)
+                string refArticle = selectedItem.SubItems[1].Text; // Supposons que la référence de l'article soit dans la deuxième colonne
+
+                // Supprimer l'élément du ListView
+                listView.Items.Remove(selectedItem);
+
+                // Supprimer l'élément de la base de données
+                SupprimerElementBaseDeDonnees(refArticle);
+            }
+        }
+
+        private void SupprimerElementBaseDeDonnees(string refArticle)
+        {
+            // Établir une connexion à la base de données
             using (var conn = new SQLiteConnection(connectionString))
             {
                 conn.Open();
 
-                string query = "SELECT Nom FROM Marques";
+                // Définir la commande SQL de suppression
+                string query = "DELETE FROM Articles WHERE RefArticle = @refArticle";
 
+                // Créer et paramétrer la commande
                 using (var cmd = new SQLiteCommand(query, conn))
                 {
+                    cmd.Parameters.AddWithValue("@refArticle", refArticle);
 
-                    using (var reader = cmd.ExecuteReader())
+                    // Exécuter la commande de suppression
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    // Vérifier si la suppression a réussi
+                    if (rowsAffected > 0)
                     {
-                        while (reader.Read())
-                        {
-                            string marqueName = reader["Nom"].ToString();
-
-                            ListViewItem item = new ListViewItem(new string[] { marqueName });
-                            listView.Items.Add(item);
-                        }
+                        MessageBox.Show("L'élément a été supprimé avec succès.", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("La suppression de l'élément a échoué.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-
-                conn.Close();
             }
         }
 
-        private void LoadSousFamilleListView()
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
+            // Désactiver tous les éléments du menu par défaut
+            ajouterToolStripMenuItem.Enabled = false;
+            supprimerToolStripMenuItem.Enabled = false;
+            modifierToolStripMenuItem.Enabled = false;
 
-            // Ajouter les entêtes de colonnes appropriées
-            listView.Columns.Add("Description", 200);
-
-
-            using (var conn = new SQLiteConnection(connectionString))
+            // Vérifier s'il y a des éléments sélectionnés dans le ListView
+            if (listView.SelectedItems.Count == 1 )
             {
-                conn.Open();
-
-                string query = "SELECT Nom FROM SousFamilles";
-
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string sousFamilleName = reader["Nom"].ToString();
-
-                            ListViewItem item = new ListViewItem(new string[] { sousFamilleName });
-                            listView.Items.Add(item);
-                        }
-                    }
-                }
-
-                conn.Close();
+                // Activer l'option de suppression et de modification car au moins un élément est sélectionné
+                supprimerToolStripMenuItem.Enabled = true;
+                modifierToolStripMenuItem.Enabled = true;
             }
-        } 
-        private void LoadFamilleListView()
-        {
-            listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
-
-            // Ajouter les entêtes de colonnes appropriées
-            listView.Columns.Add("Description", 200);
-
-
-            using (var conn = new SQLiteConnection(connectionString))
+            else
             {
-                conn.Open();
-
-                string query = "SELECT Nom FROM Familles";
-
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string familleName = reader["Nom"].ToString();
-
-                            ListViewItem item = new ListViewItem(new string[] { familleName });
-                            listView.Items.Add(item);
-                        }
-                    }
-                }
-
-                conn.Close();
+                // Aucun élément sélectionné, donc désactiver les options de suppression et de modification
+                supprimerToolStripMenuItem.Enabled = false;
+                modifierToolStripMenuItem.Enabled = false;
             }
+
+            // L'option d'ajout est toujours activée
+            ajouterToolStripMenuItem.Enabled = true;
         }
 
-      
-        private void LoadArticlesByMarque(string marque)
-        {
-            listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
-
-            // Ajouter les entêtes de colonnes appropriées
-            listView.Columns.Add("Description", 200);
-            listView.Columns.Add("Ref", 100);
-            listView.Columns.Add("Marque", 150);
-            listView.Columns.Add("Famille", 150);
-            listView.Columns.Add("Sous-Famille", 150);
-            listView.Columns.Add("Prix H.T.", 100);
-            listView.Columns.Add("Quantité", 100);
-
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-
-                string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite
-                         FROM Articles A 
-                         INNER JOIN Marques M ON A.RefMarque = M.RefMarque
-                         INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
-                         INNER JOIN Familles F ON SF.RefFamille = F.RefFamille
-                         WHERE M.Nom = @Marque";
-
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Marque", marque);
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string description = reader["Description"].ToString();
-                            string refArticle = reader["RefArticle"].ToString();
-                            string marqueName = reader["Marque"].ToString();
-                            string familleName = reader["Famille"].ToString();
-                            string sousFamille = reader["Sous-Famille"].ToString();
-                            string prixHT = reader["PrixHT"].ToString();
-                            string quantite = reader["Quantite"].ToString(); 
-
-                            ListViewItem item = new ListViewItem(new string[] { description, refArticle, marqueName, familleName, sousFamille, prixHT, quantite });
-                            listView.Items.Add(item);
-                        }
-                    }
-                }
-
-                conn.Close();
-            }
-        }
-
-        private void LoadArticlesBySousFamille(string sousFamille)
+        private void ajouterToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
-
-            // Ajouter les entêtes de colonnes appropriées
-            listView.Columns.Add("Description", 200);
-            listView.Columns.Add("Ref", 100);
-            listView.Columns.Add("Marque", 150);
-            listView.Columns.Add("Famille", 150);
-            listView.Columns.Add("Sous-Famille", 150);
-            listView.Columns.Add("Prix H.T.", 100);
-            listView.Columns.Add("Quantité", 100);
-
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-
-                string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite
-                             FROM Articles A 
-                             INNER JOIN Marques M ON A.RefMarque = M.RefMarque
-                             INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
-                             INNER JOIN Familles F ON SF.RefFamille = F.RefFamille
-                             WHERE SF.Nom = @SousFamille";
-
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@SousFamille", sousFamille);
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string description = reader["Description"].ToString();
-                            string refArticle = reader["RefArticle"].ToString();
-                            string marque = reader["Marque"].ToString();
-                            string famille = reader["Famille"].ToString();
-                            string sousFamilleName = reader["Sous-Famille"].ToString();
-                            string prixHT = reader["PrixHT"].ToString();
-                            string quantite = reader["Quantite"].ToString();
-
-                            ListViewItem item = new ListViewItem(new string[] { description, refArticle, marque, famille, sousFamilleName, prixHT,quantite });
-                            listView.Items.Add(item);
-                        }
-                    }
-                }
-
-                conn.Close();
-            }
+            FormAjout formAjout = new FormAjout(listView); // Passer une référence à listView
+            formAjout.Show();
         }
 
-        private void LoadAllArticles()
+        private void supprimerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
 
-            // Ajouter les entêtes de colonnes appropriées
-            listView.Columns.Add("Description", 200);
-            listView.Columns.Add("Référence", 100);
-            listView.Columns.Add("Marque", 150);
-            listView.Columns.Add("Famille", 150);
-            listView.Columns.Add("Sous-famille", 150);
-            listView.Columns.Add("Prix H.T.", 100);
-            listView.Columns.Add("Quantité", 100);
-            
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
 
-                string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite 
-                             FROM Articles A 
-                             INNER JOIN Marques M ON A.RefMarque = M.RefMarque
-                             INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
-                             INNER JOIN Familles F ON SF.RefFamille = F.RefFamille";
+            SupprimerElement();
 
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string description = reader["Description"].ToString();
-                            string refArticle = reader["RefArticle"].ToString();
-                            string marque = reader["Marque"].ToString();
-                            string famille = reader["Famille"].ToString();
-                            string sousFamille = reader["Sous-Famille"].ToString();
-                            string prixHT = reader["PrixHT"].ToString();
-                            string quantite = reader["Quantite"].ToString(); // Ajout de la quantité
-
-                            ListViewItem item = new ListViewItem(new string[] { description, refArticle, marque, famille, sousFamille, prixHT, quantite });
-                            listView.Items.Add(item);
-
-                        }
-                    }
-                }
-                conn.Close();
-                GestionGroupes.GroupItemsByFirstLetter(listView);
-            }
         }
+
+        private void modifierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            OuvrirFenetreModification();
+
+
+        }
+
     }
-
-
 }

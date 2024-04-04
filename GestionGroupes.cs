@@ -48,7 +48,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        // Autres méthodes de regroupement...
+       
 
         // Exemple de méthode pour regrouper par une autre colonne
         public static void GroupItemsByMarque(ListView listView)
@@ -70,6 +70,24 @@ namespace WindowsFormsApp1
             }
         }
 
-        // Méthode pour regrouper par une colonne contenant une sous-famille, etc.
+        // Méthode pour regrouper par une colonne contenant une sous-famille
+        public static void GroupItemsBySousFamille(ListView listView)
+        {
+            listView.Groups.Clear();
+
+            Dictionary<string, ListViewGroup> groups = new Dictionary<string, ListViewGroup>();
+
+            foreach (ListViewItem item in listView.Items)
+            {
+                string sousFamille = item.SubItems[4].Text; // Index de la colonne Sous-Famille
+                if (!groups.ContainsKey(sousFamille))
+                {
+                    ListViewGroup group = new ListViewGroup(sousFamille);
+                    listView.Groups.Add(group);
+                    groups.Add(sousFamille, group);
+                }
+                item.Group = groups[sousFamille];
+            }
+        }
     }
 }
