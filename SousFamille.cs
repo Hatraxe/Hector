@@ -44,11 +44,11 @@ namespace WindowsFormsApp1
                         else
                         {
                             // Sous-famille existante : effectue une mise à jour
-                            using (var cmdUpdate = new SQLiteCommand("UPDATE SousFamilles SET Nom = @Nom, RefFamille = @RefFamille WHERE ReferenceSousFamille = @ReferenceSousFamille", conn))
+                            using (var cmdUpdate = new SQLiteCommand("UPDATE SousFamilles SET Nom = @Nom, RefFamille = @RefFamille WHERE RefSousFamille = @RefSousFamille", conn))
                             {
                                 cmdUpdate.Parameters.AddWithValue("@Nom", Nom);
                                 cmdUpdate.Parameters.AddWithValue("@RefFamille", RefFamille);
-                                cmdUpdate.Parameters.AddWithValue("@ReferenceSousFamille", ReferenceSousFamille);
+                                cmdUpdate.Parameters.AddWithValue("@RefSousFamille", ReferenceSousFamille);
                                 cmdUpdate.ExecuteNonQuery();
                             }
                         }
@@ -56,6 +56,28 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+        }
+
+        public static int GetLastReference(string connectionString)
+        {
+            int lastReference = 0;
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                using (var cmd = new SQLiteCommand("SELECT MAX(RefSousFamille) FROM SousFamilles", conn))
+                {
+                    var result = cmd.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        lastReference = Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            return lastReference;
         }
         public static int GetReferenceFromNom(string nom, string connectionString)
         {

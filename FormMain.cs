@@ -216,7 +216,7 @@ namespace Hector
             {
                 if (listView.SelectedItems.Count > 0)
                 {
-                    SupprimerElement();
+                    GestionSuppression.SupprimerElement(listView,connectionString);
                 }
             }
         }
@@ -235,55 +235,7 @@ namespace Hector
         {
 
         }
-        private void SupprimerElement()
-        {
-            if (listView.SelectedItems.Count > 0)
-            {
-                // Récupérer l'élément sélectionné dans le ListView
-                ListViewItem selectedItem = listView.SelectedItems[0];
-
-                // Récupérer l'identifiant de l'élément sélectionné (par exemple, la référence de l'article)
-                string refArticle = selectedItem.SubItems[1].Text; // Supposons que la référence de l'article soit dans la deuxième colonne
-
-                // Supprimer l'élément du ListView
-                listView.Items.Remove(selectedItem);
-
-                // Supprimer l'élément de la base de données
-                SupprimerElementBaseDeDonnees(refArticle);
-            }
-        }
-
-        private void SupprimerElementBaseDeDonnees(string refArticle)
-        {
-            // Établir une connexion à la base de données
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-
-                // Définir la commande SQL de suppression
-                string query = "DELETE FROM Articles WHERE RefArticle = @refArticle";
-
-                // Créer et paramétrer la commande
-                using (var cmd = new SQLiteCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@refArticle", refArticle);
-
-                    // Exécuter la commande de suppression
-                    int rowsAffected = cmd.ExecuteNonQuery();
-
-                    // Vérifier si la suppression a réussi
-                    if (rowsAffected > 0)
-                    {
-                        MessageBox.Show("L'élément a été supprimé avec succès.", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("La suppression de l'élément a échoué.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        }
-
+     
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // Désactiver tous les éléments du menu par défaut
@@ -312,25 +264,42 @@ namespace Hector
         private void ajouterToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            FormAjout formAjout = new FormAjout(listView); // Passer une référence à listView
-            formAjout.Show();
+           
         }
 
         private void supprimerToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
 
-            SupprimerElement();
+            GestionSuppression.SupprimerElement(listView,connectionString);
 
         }
 
         private void modifierToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
             OuvrirFenetreModification();
+        }
 
+        private void articleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormAjout formAjout = new FormAjout(listView); // Passer une référence à listView
+            formAjout.ShowDialog();
+        }
+
+        private void familleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
 
         }
 
+        private void sousFamilleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormAjoutSousFamille formAjoutSF = new FormAjoutSousFamille(listView);
+            formAjoutSF.ShowDialog();
+        }
+
+        private void marqueToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

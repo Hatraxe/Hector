@@ -73,6 +73,24 @@
     <Compile Include="FormAjout.Designer.cs">
       <DependentUpon>FormAjout.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormAjoutFamille.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAjoutFamille.Designer.cs">
+      <DependentUpon>FormAjoutFamille.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormAjoutMarque.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAjoutMarque.Designer.cs">
+      <DependentUpon>FormAjoutMarque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormAjoutSousFamille.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAjoutSousFamille.Designer.cs">
+      <DependentUpon>FormAjoutSousFamille.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormModifier.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,12 +113,22 @@
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
     <Compile Include="GestionLoad.cs" />
+    <Compile Include="GestionSuppression.cs" />
     <Compile Include="Marque.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SousFamille.cs" />
     <EmbeddedResource Include="FormAjout.resx">
       <DependentUpon>FormAjout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormAjoutFamille.resx">
+      <DependentUpon>FormAjoutFamille.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormAjoutMarque.resx">
+      <DependentUpon>FormAjoutMarque.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormAjoutSousFamille.resx">
+      <DependentUpon>FormAjoutSousFamille.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormImport.resx">
       <DependentUpon>FormImport.cs</DependentUpon>

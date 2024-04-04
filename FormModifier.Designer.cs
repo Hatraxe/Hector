@@ -235,6 +235,7 @@ namespace Hector
             this.Controls.Add(this.sousFamBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "FormModifier";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Modifier un article";
             this.ResumeLayout(false);
             this.PerformLayout();

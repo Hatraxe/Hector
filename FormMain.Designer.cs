@@ -47,6 +47,10 @@ namespace Hector
             this.ajouterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.supprimerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modifierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.articleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.familleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sousFamilleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.marqueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -138,6 +142,7 @@ namespace Hector
             // 
             this.listView.BackColor = System.Drawing.Color.White;
             this.listView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.listView.ContextMenuStrip = this.contextMenuStrip1;
             this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView.Font = new System.Drawing.Font("Arial", 11F);
             this.listView.ForeColor = System.Drawing.Color.Black;
@@ -154,7 +159,6 @@ namespace Hector
             this.listView.DoubleClick += new System.EventHandler(this.ListView_DoubleClick);
             this.listView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listView_KeyDown);
             this.listView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ListView_KeyUp);
-            this.listView.ContextMenuStrip = contextMenuStrip1;
             // 
             // contextMenuStrip1
             // 
@@ -169,6 +173,11 @@ namespace Hector
             // 
             // ajouterToolStripMenuItem
             // 
+            this.ajouterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.articleToolStripMenuItem,
+            this.familleToolStripMenuItem,
+            this.sousFamilleToolStripMenuItem,
+            this.marqueToolStripMenuItem});
             this.ajouterToolStripMenuItem.Name = "ajouterToolStripMenuItem";
             this.ajouterToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
             this.ajouterToolStripMenuItem.Text = "Ajouter";
@@ -177,16 +186,44 @@ namespace Hector
             // supprimerToolStripMenuItem
             // 
             this.supprimerToolStripMenuItem.Name = "supprimerToolStripMenuItem";
-            this.supprimerToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.supprimerToolStripMenuItem.Size = new System.Drawing.Size(147, 24);
             this.supprimerToolStripMenuItem.Text = "Supprimer";
             this.supprimerToolStripMenuItem.Click += new System.EventHandler(this.supprimerToolStripMenuItem_Click);
             // 
             // modifierToolStripMenuItem
             // 
             this.modifierToolStripMenuItem.Name = "modifierToolStripMenuItem";
-            this.modifierToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.modifierToolStripMenuItem.Size = new System.Drawing.Size(147, 24);
             this.modifierToolStripMenuItem.Text = "Modifier";
             this.modifierToolStripMenuItem.Click += new System.EventHandler(this.modifierToolStripMenuItem_Click);
+            // 
+            // articleToolStripMenuItem
+            // 
+            this.articleToolStripMenuItem.Name = "articleToolStripMenuItem";
+            this.articleToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.articleToolStripMenuItem.Text = "Article";
+            this.articleToolStripMenuItem.Click += new System.EventHandler(this.articleToolStripMenuItem_Click);
+            // 
+            // familleToolStripMenuItem
+            // 
+            this.familleToolStripMenuItem.Name = "familleToolStripMenuItem";
+            this.familleToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.familleToolStripMenuItem.Text = "Famille";
+            this.familleToolStripMenuItem.Click += new System.EventHandler(this.familleToolStripMenuItem_Click);
+            // 
+            // sousFamilleToolStripMenuItem
+            // 
+            this.sousFamilleToolStripMenuItem.Name = "sousFamilleToolStripMenuItem";
+            this.sousFamilleToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.sousFamilleToolStripMenuItem.Text = "Sous Famille";
+            this.sousFamilleToolStripMenuItem.Click += new System.EventHandler(this.sousFamilleToolStripMenuItem_Click);
+            // 
+            // marqueToolStripMenuItem
+            // 
+            this.marqueToolStripMenuItem.Name = "marqueToolStripMenuItem";
+            this.marqueToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.marqueToolStripMenuItem.Text = "Marque";
+            this.marqueToolStripMenuItem.Click += new System.EventHandler(this.marqueToolStripMenuItem_Click);
             // 
             // FormMain
             // 
@@ -198,6 +235,7 @@ namespace Hector
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "FormMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "FormMain";
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.FormMain_KeyUp);
@@ -233,6 +271,10 @@ namespace Hector
         private ToolStripMenuItem ajouterToolStripMenuItem;
         private ToolStripMenuItem supprimerToolStripMenuItem;
         private ToolStripMenuItem modifierToolStripMenuItem;
+        private ToolStripMenuItem articleToolStripMenuItem;
+        private ToolStripMenuItem familleToolStripMenuItem;
+        private ToolStripMenuItem sousFamilleToolStripMenuItem;
+        private ToolStripMenuItem marqueToolStripMenuItem;
     }
 }
 
