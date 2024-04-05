@@ -11,6 +11,14 @@ namespace WindowsFormsApp1
         public int RefSousFamille { get; set; }
         public int RefMarque { get; set; }
 
+        /// <summary>
+        /// Class permettatn de manipuler les articles et contenant les methodes pour creer et inserer dans la base de donnees des articles
+        /// </summary>
+        /// <param name="refArticle"></param>
+        /// <param name="description"></param>
+        /// <param name="prixHT"></param>
+        /// <param name="refSousFamille"></param>
+        /// <param name="refMarque"></param>
         public Article(string refArticle, string description, float prixHT, int refSousFamille, int refMarque)
         {
             RefArticle = refArticle;
@@ -20,6 +28,10 @@ namespace WindowsFormsApp1
             RefMarque = refMarque;
         }
 
+        /// <summary>
+        /// Methode permettant d' ajouter dans la base des articles et aussi de les modifier
+        /// </summary>
+        /// <param name="conn"></param>
         public void InsertOrUpdate(SQLiteConnection conn)
         {
             if (conn == null)

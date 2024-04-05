@@ -9,6 +9,10 @@ namespace WindowsFormsApp1
         public string Nom { get; set; }
         public int RefFamille { get; set; }
 
+        /// <summary>
+        /// Methode permettant d'ajouter une sous famille dans la base de donnees
+        /// </summary>
+        /// <param name="conn"></param>
         public void InsertOrUpdate(SQLiteConnection conn)
         {
             if (conn == null)
@@ -41,6 +45,16 @@ namespace WindowsFormsApp1
                                 ReferenceSousFamille = Convert.ToInt32(cmdInsert.ExecuteScalar());
                             }
                         }
+
+                        // Si ReferenceSousFamille est toujours égal à 0, cela signifie qu'aucune insertion n'a été effectuée
+                        // Nous devons alors obtenir la nouvelle référence de sous-famille
+                        if (ReferenceSousFamille == 0)
+                        {
+                            using (var cmdLastRowId = new SQLiteCommand("SELECT last_insert_rowid();", conn))
+                            {
+                                ReferenceSousFamille = Convert.ToInt32(cmdLastRowId.ExecuteScalar()) + 1;
+                            }
+                        }
                         else
                         {
                             // Sous-famille existante : effectue une mise à jour
@@ -58,27 +72,14 @@ namespace WindowsFormsApp1
             }
         }
 
-        public static int GetLastReference(string connectionString)
-        {
-            int lastReference = 0;
+       
 
-            using (var conn = new SQLiteConnection(connectionString))
-            {
-                conn.Open();
-
-                using (var cmd = new SQLiteCommand("SELECT MAX(RefSousFamille) FROM SousFamilles", conn))
-                {
-                    var result = cmd.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        lastReference = Convert.ToInt32(result);
-                    }
-                }
-            }
-
-            return lastReference;
-        }
+        /// <summary>
+        /// Methode permettatn de retrouver la referene de la sous famille en focntion de son nom
+        /// </summary>
+        /// <param name="nom"></param>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
         public static int GetReferenceFromNom(string nom, string connectionString)
         {
             int reference = 0;
@@ -101,5 +102,7 @@ namespace WindowsFormsApp1
 
             return reference;
         }
+
+
     }
 }

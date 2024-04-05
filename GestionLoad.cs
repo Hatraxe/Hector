@@ -6,14 +6,23 @@ using WindowsFormsApp1;
 
 namespace Hector
 {
+    /// <summary>
+    /// Classe permettant la gestion des chargment des donnes dans le lsitview , treeView et combo box
+    /// </summary>
     public static class GestionLoad
     {
-      
+        /// <summary>
+        /// Methode permettatn de charger les familles dans le treeNode
+        /// </summary>
+        /// <param name="parentNode"></param>
+        /// <param name="connectionString"></param>
         public static void LoadFamilies(TreeNode parentNode, string connectionString)
         {
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString)) //Connection à la base de donnees
             {
                 conn.Open();
+
+                // Requete pour recuperer les valeurs souhaitees
                 string query = "SELECT RefFamille, Nom FROM Familles";
                 using (var cmd = new SQLiteCommand(query, conn))
                 {
@@ -33,9 +42,14 @@ namespace Hector
             }
         }
 
+        /// <summary>
+        /// Methode permettant de charger les Famille dans le comboBox
+        /// </summary>
+        /// <param name="comboBox"></param>
+        /// <param name="connectionString"></param>
         public static void LoadFamilleBox(ComboBox comboBox, string connectionString)
         {
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString))//Connection à la base de donnees
             {
                 conn.Open();
                 string query = "SELECT Nom FROM Familles";
@@ -43,21 +57,29 @@ namespace Hector
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
+                        //boucle sur le resultat de la requete
                         while (reader.Read())
                         {
                             string familleNom = reader["Nom"].ToString();
-                            comboBox.Items.Add(familleNom);
+                            comboBox.Items.Add(familleNom);//Ajout dans le comboBox
                         }
                     }
                 }
                 conn.Close();
             }
         }
+
+        /// <summary>
+        /// Methode permettant de charger les sousfamilles dans le comboBox
+        /// </summary>
+        /// <param name="comboBox"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="familleSelectionnee"></param>
         public static void LoadSousFamilleBox(ComboBox comboBox, string connectionString, string familleSelectionnee)
         {
             comboBox.Items.Clear(); // Effacer les éléments précédents
 
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString)) //Connection à la base de donnees
             {
                 conn.Open();
                 string query = @"SELECT SF.Nom 
@@ -72,7 +94,7 @@ namespace Hector
                         while (reader.Read())
                         {
                             string sousFamilleNom = reader["Nom"].ToString();
-                            comboBox.Items.Add(sousFamilleNom);
+                            comboBox.Items.Add(sousFamilleNom); //Ajout dans le comboBox
                         }
                     }
                 }
@@ -80,9 +102,14 @@ namespace Hector
             }
         }
 
+        /// <summary>
+        /// Methode permettatn de charger les amrque dans le comboBox
+        /// </summary>
+        /// <param name="comboBox"></param>
+        /// <param name="connectionString"></param>
         public static void LoadMarqueBox(ComboBox comboBox, string connectionString)
         {
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString)) //Connection à la base de donnees
             {
                 conn.Open();
                 string query = "SELECT Nom FROM Marques";
@@ -90,19 +117,27 @@ namespace Hector
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
+                        //boucle sur le resultat de la requete
                         while (reader.Read())
                         {
                             string familleNom = reader["Nom"].ToString();
-                            comboBox.Items.Add(familleNom);
+                            comboBox.Items.Add(familleNom); //ajout dans le combobox
                         }
                     }
                 }
                 conn.Close();
             }
         }
+
+        /// <summary>
+        /// Charge les sousFamilles saans le treeVIew
+        /// </summary>
+        /// <param name="parentNode"></param>
+        /// <param name="refFamille"></param>
+        /// <param name="connectionString"></param>
         public static void LoadSousFamilles(TreeNode parentNode, int refFamille, string connectionString)
         {
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString)) //Connection à la base de donnees
             {
                 conn.Open();
                 string query = "SELECT Nom FROM SousFamilles WHERE RefFamille = @RefFamille";
@@ -111,21 +146,28 @@ namespace Hector
                     cmd.Parameters.AddWithValue("@RefFamille", refFamille);
                     using (var reader = cmd.ExecuteReader())
                     {
+                        //boucle sur le resultat de la 
                         while (reader.Read())
                         {
                             string sousFamilleNom = reader["Nom"].ToString();
                             TreeNode sousFamilyNode = new TreeNode(sousFamilleNom);
-                            parentNode.Nodes.Add(sousFamilyNode);
+                            parentNode.Nodes.Add(sousFamilyNode); //Ajout dans le node
                         }
                     }
                 }
                 conn.Close();
             }
         }
-
+        
+        /// <summary>
+        /// Charge les marques dans le treeView
+        /// </summary>
+        /// <param name="parentNode"></param>
+        /// <param name="connectionString"></param>
+        /// 
         public static void LoadBrands(TreeNode parentNode, string connectionString)
         {
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString)) //Connection à la base de donnees
             {
                 conn.Open();
                 string query = "SELECT Nom FROM Marques";
@@ -133,10 +175,11 @@ namespace Hector
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
+                        //boucle sur le resultat de la requete
                         while (reader.Read())
                         {
                             string MarqueNom = reader["Nom"].ToString();
-                            parentNode.Nodes.Add(MarqueNom);
+                            parentNode.Nodes.Add(MarqueNom);//Ajout dans le node
                         }
                     }
                 }
@@ -144,6 +187,11 @@ namespace Hector
             }
         }
 
+        /// <summary>
+        /// Charge tout les articles dans la listView
+        /// </summary>
+        /// <param name="listView"></param>
+        /// <param name="connectionString"></param>
         public static void LoadAllArticles(ListView listView, string connectionString)
         {
             listView.Items.Clear();
@@ -158,7 +206,7 @@ namespace Hector
             listView.Columns.Add("Prix H.T.", 100);
             listView.Columns.Add("Quantité", 100);
 
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString)) //Connection à la base de donnees
             {
                 conn.Open();
 
@@ -172,8 +220,10 @@ namespace Hector
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
+                        //boucle sur le resultat de la requete
                         while (reader.Read())
                         {
+
                             string description = reader["Description"].ToString();
                             string refArticle = reader["RefArticle"].ToString();
                             string marque = reader["Marque"].ToString();
@@ -182,6 +232,7 @@ namespace Hector
                             string prixHT = reader["PrixHT"].ToString();
                             string quantite = reader["Quantite"].ToString(); // Ajout de la quantité
 
+
                             ListViewItem item = new ListViewItem(new string[] { description, refArticle, marque, famille, sousFamille, prixHT, quantite });
                             listView.Items.Add(item);
 
@@ -189,9 +240,14 @@ namespace Hector
                     }
                 }
                 conn.Close();
-                
+
             }
         }
+        /// <summary>
+        /// Charge la lsite des marques dans le listView
+        /// </summary>
+        /// <param name="listView"></param>
+        /// <param name="connectionString"></param>
         public static void LoadMarqueListView(ListView listView, string connectionString)
         {
             listView.Items.Clear();
@@ -200,7 +256,7 @@ namespace Hector
             // Ajouter les entêtes de colonnes appropriées
             listView.Columns.Add("Description", 200);
 
-            using (var conn = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString)) //Connection à la base de donnees
             {
                 conn.Open();
 
@@ -223,7 +279,12 @@ namespace Hector
                 GestionGroupes.GroupItemsByFirstLetter(listView);
             }
         }
-        //charge la liste des osusfamilles
+
+        /// <summary>
+        /// CHarge la lsite de sosu familles dans le lsitVIew
+        /// </summary>
+        /// <param name="listView"></param>
+        /// <param name="connectionString"></param>
         public static void LoadSousFamilleListView(ListView listView, string connectionString)
         {
             listView.Items.Clear();
@@ -245,6 +306,8 @@ namespace Hector
                         while (reader.Read())
                         {
                             string sousFamilleNom = reader["Nom"].ToString();
+
+                            // Créer un nouvel objet ListViewItem avec les valeurs récupérées et l'ajouter à la ListView
                             ListViewItem item = new ListViewItem(new string[] { sousFamilleNom });
                             listView.Items.Add(item);
                         }
@@ -287,7 +350,12 @@ namespace Hector
         }
 
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="listView"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="marque"></param>
         public static void LoadArticlesByMarque(ListView listView, string connectionString, string marque)
         {
             listView.Items.Clear();
@@ -306,6 +374,8 @@ namespace Hector
             {
                 conn.Open();
 
+                // Requête SQL pour sélectionner les valeurs souhaitees
+
                 string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite
                          FROM Articles A 
                          INNER JOIN Marques M ON A.RefMarque = M.RefMarque
@@ -321,6 +391,7 @@ namespace Hector
                     {
                         while (reader.Read())
                         {
+                            // Récupérer les valeurs de chaque colonne dans la ligne actuelle
                             string description = reader["Description"].ToString();
                             string refArticle = reader["RefArticle"].ToString();
                             string marqueNom = reader["Marque"].ToString();
@@ -329,6 +400,7 @@ namespace Hector
                             string prixHT = reader["PrixHT"].ToString();
                             string quantite = reader["Quantite"].ToString();
 
+                            // Créer un nouvel objet ListViewItem avec les valeurs récupérées et l'ajouter à la ListView
                             ListViewItem item = new ListViewItem(new string[] { description, refArticle, marqueNom, familleNom, sousFamille, prixHT, quantite });
                             listView.Items.Add(item);
                         }
@@ -339,47 +411,74 @@ namespace Hector
             }
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="listView"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="famille"></param>
+        /// 
         public static void LoadSousFamillesByFamille(ListView listView, string connectionString, string famille)
         {
+            // Effacer tous les éléments et colonnes existants dans la ListView
             listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
+            listView.Columns.Clear();
 
             // Ajouter les entêtes de colonnes appropriées
-            listView.Columns.Add("Description", 200); // Correction de l'entête de colonne
+            listView.Columns.Add("Sous-Famille", 200);
 
+            // Créer une connexion à la base de données SQLite en utilisant la chaîne de connexion fournie
             using (var conn = new SQLiteConnection(connectionString))
             {
-                conn.Open();
+                conn.Open(); // Ouvrir la connexion à la base de données
 
+                // Requête SQL pour sélectionner les sous-familles appartenant à la famille spécifiée
                 string query = @"SELECT SF.Nom AS 'Sous-Famille' 
                          FROM SousFamilles SF
                          INNER JOIN Familles F ON SF.RefFamille = F.RefFamille
                          WHERE F.Nom = @Famille";
 
+                // Créer une commande SQL avec la requête et la connexion spécifiées
                 using (var cmd = new SQLiteCommand(query, conn))
                 {
+                    // Ajouter un paramètre à la commande pour la famille spécifiée
                     cmd.Parameters.AddWithValue("@Famille", famille);
 
+                    // Exécuter la commande SQL et récupérer les résultats dans un objet SqlDataReader
                     using (var reader = cmd.ExecuteReader())
                     {
+                        // Parcourir les résultats de la requête
                         while (reader.Read())
                         {
-                            string description = reader["Sous-Famille"].ToString(); // Correction de la clé de lecture
+                            // Récupérer les valeurs de chaque colonne dans la ligne actuelle
+                            string description = reader["Sous-Famille"].ToString();
 
+                            // Créer un nouvel objet ListViewItem avec la valeur récupérée et l'ajouter à la ListView
                             ListViewItem item = new ListViewItem(new string[] { description });
                             listView.Items.Add(item);
                         }
                     }
                 }
 
-                conn.Close();
+                conn.Close(); // Fermer la connexion à la base de données
             }
         }
 
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="listView"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="sousFamille"></param>
+        /// 
         public static void LoadArticlesBySousFamille(ListView listView, string connectionString, string sousFamille)
         {
+            // Effacer tous les éléments et colonnes existants dans la ListView
             listView.Items.Clear();
-            listView.Columns.Clear(); // Effacer les colonnes existantes
+            listView.Columns.Clear();
 
             // Ajouter les entêtes de colonnes appropriées
             listView.Columns.Add("Description", 200);
@@ -390,25 +489,32 @@ namespace Hector
             listView.Columns.Add("Prix H.T.", 100);
             listView.Columns.Add("Quantité", 100);
 
+            // Créer une connexion à la base de données SQLite en utilisant la chaîne de connexion fournie
             using (var conn = new SQLiteConnection(connectionString))
             {
-                conn.Open();
+                conn.Open(); // Ouvrir la connexion à la base de données
 
+                // Requête SQL pour sélectionner les articles appartenant à la sous-famille spécifiée
                 string query = @"SELECT A.Description, A.RefArticle, M.Nom AS Marque, F.Nom AS Famille, SF.Nom AS 'Sous-Famille', A.PrixHT, A.Quantite
-                             FROM Articles A 
-                             INNER JOIN Marques M ON A.RefMarque = M.RefMarque
-                             INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
-                             INNER JOIN Familles F ON SF.RefFamille = F.RefFamille
-                             WHERE SF.Nom = @SousFamille";
+                         FROM Articles A 
+                         INNER JOIN Marques M ON A.RefMarque = M.RefMarque
+                         INNER JOIN SousFamilles SF ON A.RefSousFamille = SF.RefSousFamille
+                         INNER JOIN Familles F ON SF.RefFamille = F.RefFamille
+                         WHERE SF.Nom = @SousFamille";
 
+                // Créer une commande SQL avec la requête et la connexion spécifiées
                 using (var cmd = new SQLiteCommand(query, conn))
                 {
+                    // Ajouter un paramètre à la commande pour la sous-famille spécifiée
                     cmd.Parameters.AddWithValue("@SousFamille", sousFamille);
 
+                    // Exécuter la commande SQL et récupérer les résultats dans un objet SqlDataReader
                     using (var reader = cmd.ExecuteReader())
                     {
+                        // Parcourir les résultats de la requête
                         while (reader.Read())
                         {
+                            // Récupérer les valeurs de chaque colonne dans la ligne actuelle
                             string description = reader["Description"].ToString();
                             string refArticle = reader["RefArticle"].ToString();
                             string marque = reader["Marque"].ToString();
@@ -417,14 +523,16 @@ namespace Hector
                             string prixHT = reader["PrixHT"].ToString();
                             string quantite = reader["Quantite"].ToString();
 
+                            // Créer un nouvel objet ListViewItem avec les valeurs récupérées et l'ajouter à la ListView
                             ListViewItem item = new ListViewItem(new string[] { description, refArticle, marque, famille, sousFamilleNom, prixHT, quantite });
                             listView.Items.Add(item);
                         }
                     }
                 }
 
-                conn.Close();
+                conn.Close(); // Fermer la connexion à la base de données
             }
         }
+
     }
 }

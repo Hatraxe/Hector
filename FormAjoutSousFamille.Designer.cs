@@ -107,6 +107,7 @@ namespace WindowsFormsApp1
             this.Controls.Add(this.buttonAjouter);
             this.Controls.Add(this.label1);
             this.Name = "FormAjoutSousFamille";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "FormAjoutSousFamille";
             this.ResumeLayout(false);
             this.PerformLayout();

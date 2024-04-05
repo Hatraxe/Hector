@@ -9,7 +9,10 @@ namespace WindowsFormsApp1
         public string Nom { get; set; }
 
 
-
+        /// <summary>
+        /// Permet l'ajout d'une amrque dans la base de donnees
+        /// </summary>
+        /// <param name="conn"></param>
         public void InsertOrUpdate(SQLiteConnection conn)
         {
             if (conn == null)
@@ -41,7 +44,12 @@ namespace WindowsFormsApp1
         }
         
 
-          
+          /// <summary>
+          /// Pemrmet de recupere la refernece en focntion du nom
+          /// </summary>
+          /// <param name="nom"></param>
+          /// <param name="connectionString"></param>
+          /// <returns></returns>
         public static int GetReferenceFromNom(string nom, string connectionString)
         {
             int reference = 0;
@@ -50,11 +58,7 @@ namespace WindowsFormsApp1
             {
                 conn.Open();
 
-               /* // Exécuter la requête SQL pour récupérer la référence de la sous-famille
-                var cmdGetReference = new SQLiteCommand("SELECT RefSousFamille FROM SousFamilles WHERE Nom = @nom", conn);
-                cmdGetReference.Parameters.AddWithValue("@nom", nom);
-                var result = cmdGetReference.ExecuteScalar();*/
-                // Exécuter la requête SQL pour récupérer la référence de la marque
+               
                 var cmdGetReference = new SQLiteCommand("SELECT RefMarque FROM Marques WHERE Nom = @nom", conn);
                 cmdGetReference.Parameters.AddWithValue("@nom", nom);
                 var result = cmdGetReference.ExecuteScalar();

@@ -10,6 +10,11 @@ namespace WindowsFormsApp1
 {
     class GestionSuppression
     {
+        /// <summary>
+        /// Methode permettatn de surpprimet un article de la abse de donnee et de la lsit veiew
+        /// </summary>
+        /// <param name="listView"></param>
+        /// <param name="connectionString"></param>
         public static void SupprimerElement(ListView listView,string connectionString)
         {
             if (listView.SelectedItems.Count > 0)
@@ -28,6 +33,11 @@ namespace WindowsFormsApp1
             }
         }
 
+        /// <summary>
+        /// Methode permettant de supprimer un article de la base de donnees
+        /// </summary>
+        /// <param name="refArticle"></param>
+        /// <param name="connectionString"></param>
         private static  void SupprimerElementBaseDeDonnees(string refArticle,string connectionString)
         {
             // Établir une connexion à la base de données

@@ -12,15 +12,21 @@ namespace Hector
         private string connectionString;
         private ListView listView;
 
+        /// <summary>
+        /// Classe implementant le formulaire de modification des articles
+        /// </summary>
+        /// <param name="listView"></param>
         public FormModifier(ListView listView)
         {
-            InitializeComponent();
+            InitializeComponent();//Initialise les composants
             this.listView = listView; // Stocker la référence à listView
 
             InitializeDatabase();
-            LoadData();
+            LoadData(); //Chargement des donnes dans les comboBox
         }
-
+        /// <summary>
+        ///  Methode implementant la logique derriere l'initialisation de la connection a la base de donnes
+        /// </summary>
         private void InitializeDatabase()
         {
             string appPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -28,11 +34,19 @@ namespace Hector
             connectionString = $"Data Source={dbPath};Version=3;";
         }
 
+        /// <summary>
+        ///  Methode implementant la logique derriere le bouton annuler du formulaire
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonAnnuler_Click(object sender, EventArgs e)
         {
             this.Close(); // Ferme la fenêtre de modification
         }
 
+        /// <summary>
+        ///  Methode implementant la logique derriere le chargement des comboBox avec les donnees possible pour faciliter la saisie et eviter les erreurs
+        /// </summary>
         private void LoadData()
         {
 
@@ -52,6 +66,9 @@ namespace Hector
         }
 
 
+        /// <summary>
+        ///  Methode implementant la logique derriere la reinitialisation des combobox et des textbox
+        /// </summary>
         private void ClearFields()
         {
             // Effacer le contenu des champs
@@ -63,7 +80,17 @@ namespace Hector
             marqueBox.SelectedIndex = -1;
             sousFamBox.SelectedIndex = -1;
         }
-        // Méthode pour remplir les champs avec les valeurs passées
+
+        /// <summary>
+        ///  Methode implementant la logique derriere le remplissage des champs du formulaire par les donnes de la ligne selectionnee
+        /// </summary>
+        /// <param name="description"></param>
+        /// <param name="refArticle"></param>
+        /// <param name="marque"></param>
+        /// <param name="famille"></param>
+        /// <param name="sousFamille"></param>
+        /// <param name="prixHT"></param>
+        /// <param name="quantite"></param>
         public void RemplirChamps(string description, string refArticle, string marque, string famille, string sousFamille, string prixHT, string quantite)
         {
             // Remplir les champs du formulaire avec les valeurs passées
@@ -76,6 +103,11 @@ namespace Hector
             textBoxQuantite.Text = quantite;
         }
 
+        /// <summary>
+        ///  Methode implementant la logique derriere l'appuie sur le bouton modifier du formulaire
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonModifier_Click(object sender, EventArgs e)
         {
             // Vérifier si tous les champs obligatoires sont remplis
@@ -131,7 +163,11 @@ namespace Hector
             }
         }
 
-
+        /// <summary>
+        ///  Methode implementant la logique derriere l'appuie sur le bouton Annuler du formulaire
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonAnnuler_Click_1(object sender, EventArgs e)
         {
             this.Close(); // Ferme la fenêtre modifier
@@ -142,6 +178,11 @@ namespace Hector
 
         }
 
+        /// <summary>
+        ///  Methode implementant la logique derriere la selection de famille dans le formulaire afin de charger les sosu familles possible a selectionner dan sle combobox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void famBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 

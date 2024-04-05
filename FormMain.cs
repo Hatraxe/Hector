@@ -15,12 +15,18 @@ namespace Hector
         private string dbPath;
         private string connectionString;
 
+        /// <summary>
+        /// constructeur du formain
+        /// </summary>
         public FormMain()
         {
-            InitializeComponent();
+            InitializeComponent();//Initialise la page
             InitializeDatabase();
         }
 
+        /// <summary>
+        /// Initialise la connection a la base de donnees
+        /// </summary>
         private void InitializeDatabase()
         {
             string appPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -33,12 +39,22 @@ namespace Hector
             LoadTreeViewData();
         }
 
+        /// <summary>
+        ///  Methode implementant la logique derriere le bouton importer du menu en haut a gauche de la page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void importerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormImport formImport = new FormImport();
             formImport.ShowDialog(this);
         }
 
+        /// <summary>
+        ///  Methode implementant la logique derriere le bouton exporter du menu en haut a gauche de la page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void exporterToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog()
@@ -54,9 +70,12 @@ namespace Hector
                 MessageBox.Show("Export réussi avec succès");
             }
         }
-
+        /// <summary>
+        ///  Methode implementant la logique derriere le cahrgement du treeView dans 
+        /// </summary>
         private void LoadTreeViewData()
         {
+            //creation des noeuds principaux
             TreeNode allArticlesNode = new TreeNode("Tous les articles");
             TreeNode familiesNode = new TreeNode("Familles");
             TreeNode brandsNode = new TreeNode("Marques");
@@ -64,13 +83,13 @@ namespace Hector
             treeView.Nodes.Add(allArticlesNode);
             treeView.Nodes.Add(familiesNode);
             treeView.Nodes.Add(brandsNode);
-
+            //chargement des listes dans le treeview
             GestionLoad.LoadFamilies(familiesNode, connectionString);
             GestionLoad.LoadBrands(brandsNode, connectionString);
         }
 
         /// <summary>
-        /// 
+        ///  Methode implementant la logique derriere les clicks sur les elements du treeview 
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -78,19 +97,19 @@ namespace Hector
         {
             if (e.Node.Text == "Tous les articles")
             {
-                GestionLoad.LoadAllArticles(listView, connectionString);
+                GestionLoad.LoadAllArticles(listView, connectionString); //Affiche tout les articles dans le lsitview
             }
             else if (e.Node.Parent != null && e.Node.Parent.Text == "Familles")
             {
                 // Si un nœud "Familles" est sélectionné
                 string famille = e.Node.Text;
-                GestionLoad.LoadSousFamillesByFamille(listView, connectionString, famille);
+                GestionLoad.LoadSousFamillesByFamille(listView, connectionString, famille);//affiche toutes les sosu familles de la famille selectionnee
             }
             else if (e.Node.Parent != null && e.Node.Parent.Text == "Marques")
             {
                 // Si un nœud "Marques" est sélectionné
                 string marque = e.Node.Text;
-                GestionLoad.LoadArticlesByMarque(listView, connectionString, marque);
+                GestionLoad.LoadArticlesByMarque(listView, connectionString, marque);//affiche tout les articles de la marque selectionnée
             }
             else if (e.Node.Parent != null && e.Node.Parent.Parent != null && e.Node.Parent.Parent.Text == "Familles")
             {
@@ -100,13 +119,19 @@ namespace Hector
             }
             else if (e.Node.Text == "Familles")
             {
-                GestionLoad.LoadFamilleListView(listView, connectionString);
+                GestionLoad.LoadFamilleListView(listView, connectionString);//affiche les familles
             }
             else if (e.Node.Text == "Marques" && e.Node.Parent == null)
             {
-                GestionLoad.LoadMarqueListView(listView, connectionString);
+                GestionLoad.LoadMarqueListView(listView, connectionString);//affiche les marques
             }
         }
+
+        /// <summary>
+        ///  Methode implementant la logique derriere le click sur une colonne du lsitView afin de filtrer selon le filtre que l'on veut sur les donnees
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             switch (e.Column)
@@ -128,21 +153,25 @@ namespace Hector
                     break;
             }
         }
+        /// <summary>
+        ///  Methode implementant la logique derriere l'appuis sur la touche enter ou espace en ayant selectionner un elément 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void listView_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter || e.KeyCode == Keys.Space)
             {
                 if (listView.SelectedItems.Count > 0)
                 {
-                    FormModifier formModif = new FormModifier(listView);
-                    formModif.ShowDialog(this);
+                    OuvrirFenetreModification();
                 }
             }
         }
 
         // Méthode pour gérer l'événement DoubleClick
         /// <summary>
-        /// 
+        ///  Methode implementant la logique derriere  le double click sur un element de la lsit view
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -188,17 +217,17 @@ namespace Hector
             }
             GestionLoad.LoadAllArticles(listView, connectionString);
 
-
+            // Il faut implémenter la logique pour quadn il y jsute description comme dans famille, marque et sous famille
             if (nbrColonnes == 1)
             {
-                string description = selectedItem.Text;
+                string description = selectedItem.SubItems[0].Text;
             }
 
         }
 
 
         /// <summary>
-        /// 
+        /// Methode implementant les actions lors de l'apuie sur differentes touches F5 et delete
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -216,13 +245,13 @@ namespace Hector
             {
                 if (listView.SelectedItems.Count > 0)
                 {
-                    GestionSuppression.SupprimerElement(listView,connectionString);
+                    GestionSuppression.SupprimerElement(listView, connectionString);
                 }
             }
         }
 
         /// <summary>
-        /// 
+        /// Methode implementant la logique derriere le bouton actualsier du menu en haut a gauche de la apge
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -235,7 +264,12 @@ namespace Hector
         {
 
         }
-     
+
+        /// <summary>
+        /// Methode implementant la logique derriere le context menu strip c'est a dire lorque qu'on fait clique gauche sur la lsite view et qui affiche un menu contextuel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // Désactiver tous les éléments du menu par défaut
@@ -244,7 +278,7 @@ namespace Hector
             modifierToolStripMenuItem.Enabled = false;
 
             // Vérifier s'il y a des éléments sélectionnés dans le ListView
-            if (listView.SelectedItems.Count == 1 )
+            if (listView.SelectedItems.Count == 1)
             {
                 // Activer l'option de suppression et de modification car au moins un élément est sélectionné
                 supprimerToolStripMenuItem.Enabled = true;
@@ -264,22 +298,33 @@ namespace Hector
         private void ajouterToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-           
         }
 
+        /// <summary>
+        /// Methode implementant la logique derriere le bouton supprimer du menu contextuel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void supprimerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-
-            GestionSuppression.SupprimerElement(listView,connectionString);
-
+            GestionSuppression.SupprimerElement(listView, connectionString);// Supprime l'élément
         }
 
+        /// <summary>
+        /// Methode implementant la logique derriere le boton modifier du menu contextuel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void modifierToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OuvrirFenetreModification();
+            OuvrirFenetreModification();//ouvre la fenetre de modification
         }
 
+        /// <summary>
+        /// Methode implementant la logique derriere le bouton ajouter puis article
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void articleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormAjout formAjout = new FormAjout(listView); // Passer une référence à listView
@@ -288,18 +333,30 @@ namespace Hector
 
         private void familleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            FormAjoutFamille formAjoutF = new FormAjoutFamille();
+            formAjoutF.ShowDialog();   
         }
 
+        /// <summary>
+        /// Methode implementant la logique derriere le bouton ajouter -> sous famille
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void sousFamilleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormAjoutSousFamille formAjoutSF = new FormAjoutSousFamille(listView);
+            FormAjoutSousFamille formAjoutSF = new FormAjoutSousFamille();
             formAjoutSF.ShowDialog();
         }
 
+        /// <summary>
+        /// Methode implementant la logique derriere le bouton ajouter -> marque du menu contextuel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void marqueToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            FormAjoutMarque formAjoutM = new FormAjoutMarque();
+            formAjoutM.ShowDialog();
         }
     }
 }

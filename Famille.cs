@@ -3,13 +3,19 @@ using System.Data.SQLite;
 
 namespace WindowsFormsApp1
 {
+    /// <summary>
+    /// classe permettatn la gestion des familles , notammetn dans la base de données afin de les ajouter et modifier
+    /// </summary>
     class Famille
     {
         public int ReferenceFamille { get; set; }
         public string Nom { get; set; }
 
 
-
+        /// <summary>
+        /// Methode permettatn d'ajouter ou modifier les familles dans la base de donnes
+        /// </summary>
+        /// <param name="conn"></param>
         public void InsertOrUpdate(SQLiteConnection conn)
         {
             if (conn == null)
@@ -40,6 +46,28 @@ namespace WindowsFormsApp1
 
                 transaction.Commit();
             }
+        }
+        public static int GetReferenceFromNom(string nom, string connectionString)
+        {
+            int reference = 0;
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                // Exécuter la requête SQL pour récupérer la référence de la famille
+                var cmdGetReference = new SQLiteCommand("SELECT RefFamille FROM Familles WHERE Nom = @nom", conn);
+                cmdGetReference.Parameters.AddWithValue("@nom", nom);
+                var result = cmdGetReference.ExecuteScalar();
+
+                // Vérifier si une référence a été trouvée
+                if (result != null && result != DBNull.Value)
+                {
+                    reference = Convert.ToInt32(result);
+                }
+            }
+
+            return reference;
         }
     }
 }

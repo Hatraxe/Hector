@@ -18,20 +18,20 @@ namespace WindowsFormsApp1
         // Déclaration des champs privés
         private string dbPath; // Chemin vers la base de données
         private string connectionString; // Chaîne de connexion à la base de données
-        private ListView listeView; // ListView associée
+        
 
         // Constructeur de la classe
-        public FormAjoutSousFamille(ListView listView)
+        public FormAjoutSousFamille()
         {
             InitializeComponent(); // Initialisation des composants du formulaire
-            this.listeView = listView; // Assignation de la ListView passée en paramètre
+            
             InitializeDatabase(); // Initialisation de la base de données
             GestionLoad.LoadFamilleBox(comboBox1, connectionString); // Chargement des familles dans la ComboBox
         }
 
-        // Méthode pour initialiser la base de données
+
         /// <summary>
-        /// Initialise la connexion à la base de données.
+        ///  Méthode pour initialiser la base de données
         /// </summary>
         private void InitializeDatabase()
         {
@@ -40,7 +40,7 @@ namespace WindowsFormsApp1
             connectionString = $"Data Source={dbPath};Version=3;"; // Construction de la chaîne de connexion
         }
 
-        // Gestionnaire d'événement pour le clic sur le bouton "Ajouter"
+     
         /// <summary>
         /// Événement déclenché lors du clic sur le bouton "Ajouter".
         /// Ajoute une nouvelle sous-famille à la base de données.
@@ -55,7 +55,7 @@ namespace WindowsFormsApp1
             if (!string.IsNullOrEmpty(nomSousFamille) && !string.IsNullOrEmpty(nomFamille))
             {
                 // Récupérer la référence de la famille
-                int refFamille = SousFamille.GetReferenceFromNom(nomFamille, connectionString);
+                int refFamille = Famille.GetReferenceFromNom(nomFamille, connectionString);
 
                 // Création d'une instance de la classe SousFamille
                 SousFamille sousFamille = new SousFamille
@@ -71,6 +71,9 @@ namespace WindowsFormsApp1
                     sousFamille.InsertOrUpdate(conn); // Appel de la méthode d'insertion ou de mise à jour
                 }
 
+                // Afficher un message indiquant que la sous famille a été ajoutée avec succès
+                MessageBox.Show("La sous famille a été ajoutée avec succès !");
+
                 // Fermeture de la fenêtre d'ajout
                 this.Close();
             }
@@ -81,7 +84,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        // Gestionnaire d'événement pour le clic sur le bouton "Annuler"
+        
         /// <summary>
         /// Événement déclenché lors du clic sur le bouton "Annuler".
         /// Ferme la fenêtre d'ajout de sous-famille.
@@ -93,7 +96,7 @@ namespace WindowsFormsApp1
             this.Close(); // Fermeture de la fenêtre d'ajout
         }
 
-        // Gestionnaire d'événement pour la sélection d'un élément dans la ComboBox
+        
         /// <summary>
         /// Événement déclenché lors de la sélection d'un élément dans la ComboBox.
         /// </summary>
@@ -101,8 +104,7 @@ namespace WindowsFormsApp1
         /// <param name="e">Les arguments de l'événement.</param>
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Cette méthode n'effectue aucune action car aucune logique n'est définie pour cet événement
-            // Vous pouvez ajouter du code ici si nécessaire
+            
         }
     }
 }

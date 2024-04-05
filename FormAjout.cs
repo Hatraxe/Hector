@@ -18,15 +18,22 @@ namespace WindowsFormsApp1
         private string dbPath;
         private string connectionString;
         private ListView listView;
+
+        /// <summary>
+        /// Formulaire d'ajout d'un article 
+        /// </summary>
+        /// <param name="listView"></param>
         public FormAjout(ListView listView)
         {
-            InitializeComponent();
+            InitializeComponent(); 
             this.listView = listView; // Stocker la référence à listView
 
             InitializeDatabase();
             LoadData();
         }
-
+        /// <summary>
+        /// Initialise la base de donnee
+        /// </summary>
         private void InitializeDatabase()
         {
             string appPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -36,12 +43,19 @@ namespace WindowsFormsApp1
 
 
 
-        // Gestionnaire d'événements pour le clic sur le bouton "Annuler"
+        /// <summary>
+        /// Gestion du bouton annuler
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonAnnuler_Click(object sender, EventArgs e)
         {
             this.Close(); // Ferme la fenêtre d'ajout
         }
 
+        /// <summary>
+        /// Charge les combobox avec les fmaille,marques etsous familles disponibles
+        /// </summary>
         private void LoadData()
         {
 
@@ -59,9 +73,15 @@ namespace WindowsFormsApp1
             }
 
         }
+
+        /// <summary>
+        /// Recharger les sous-familles lorsque la famille sélectionnée change
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void famBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Recharger les sous-familles lorsque la famille sélectionnée change
+           
             if (famBox.SelectedIndex != -1)
             {
                 string familleSelectionnee = famBox.SelectedItem.ToString();
@@ -79,6 +99,11 @@ namespace WindowsFormsApp1
 
         }
 
+        /// <summary>
+        /// Gestion des actions apres l'appuie sur le bouton ajouter du formulaire
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonAjouter_Click(object sender, EventArgs e)
         {
             // Vérifier si tous les champs obligatoires sont remplis
@@ -139,6 +164,11 @@ namespace WindowsFormsApp1
             }
         }
 
+        /// <summary>
+        /// Verifie si l'article existe
+        /// </summary>
+        /// <param name="refArticle"></param>
+        /// <returns></returns>
         private bool ArticleExists(string refArticle)
         {
             using (var conn = new SQLiteConnection(connectionString))
@@ -154,6 +184,9 @@ namespace WindowsFormsApp1
             }
         }
       
+        /// <summary>
+        /// Permet de reset les champs du formulaires afin de permettre un enouvelle saisie
+        /// </summary>
         private void ClearFields()
         {
             // Effacer le contenu des champs
